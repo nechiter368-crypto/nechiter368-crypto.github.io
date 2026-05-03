@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KlevVid</title>
+  <link rel="stylesheet" href="https://unpkg.com/7.css"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+
+    /* ── РАБ. СТОЛ ── */
+    body {
+      background: url('bg.jpg') center/cover no-repeat fixed;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      user-select: none;
+    }
+
+    /* ── ИКОНКИ РАБОЧЕГО СТОЛА ── */
+    .desktop-icons {
+      position: fixed;
+      top: 14px; left: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 10;
+    }
+    .d-icon {
+      width: 68px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: default;
+      padding: 4px 2px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .d-icon:hover {
+      border-color: rgba(160, 210, 255, 0.65);
+      background: rgba(100, 170, 255, 0.20);
+    }
+    .d-icon .emoji {
+      font-size: 28px;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
+    }
+    .d-icon span {
+      font-size: 11px;
+      color: white;
+      text-align: center;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.95);
+      line-height: 1.2;
+    }
+
+    /* ── ОКНО — тёмный фон, glass-класс рисует рамку и заголовок ── */
+    .main-window {
+      position: fixed;
+      width: min(700px, calc(100vw - 24px));
+      z-index: 100;
+      animation: windowIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+
+      box-shadow:
+        0 14px 40px rgba(0,0,0,0.7) !important;
+    }
+    @keyframes windowIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* title-bar — используем нативный glass от 7.css, только курсор */
+    .main-window .title-bar {
+      cursor: move;
+    }
+
+    /* Тёмный window-body */
+    .main-window .window-body {
+      background: rgba(15, 19, 30, 0.88) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Тёмный менюбар */
+    .main-window [role="menubar"] {
+      position: relative;
+      z-index: 9999 !important;
+      background: rgba(20, 28, 50, 0.75) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(60, 90, 160, 0.35) !important;
+    }
+    /* Пункты меню — текст светлый */
+    .main-window [role="menubar"] > li,
+    .main-window [role="menubar"] > li > a {
+      color: rgba(200, 220, 255, 0.9) !important;
+    }
+    .main-window [role="menubar"] > li:hover {
+      background: rgba(60, 100, 200, 0.35) !important;
+      color: white !important;
+    }
+    .main-window [role="menu"] {
+      background: rgba(18, 24, 44, 0.94) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(80, 120, 200, 0.45) !important;
+      box-shadow: 2px 4px 18px rgba(0,0,0,0.65) !important;
+      z-index: 10000 !important;
+    }
+    .main-window [role="menu"] li,
+    .main-window [role="menu"] a {
+      color: rgba(200, 220, 255, 0.88) !important;
+    }
+    .main-window [role="menu"] li:hover {
+      background: rgba(60, 100, 200, 0.4) !important;
+    }
+
+    /* Тёмный статусбар */
+    .main-window .status-bar {
+      background: rgba(12, 16, 30, 0.85) !important;
+      backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(60, 90, 160, 0.35) !important;
+      color: rgba(160, 190, 240, 0.85) !important;
+    }
+    .main-window .status-bar p {
+      font-size: 11px !important;
+      color: rgba(160, 190, 240, 0.85) !important;
+    }
+
+    /* Свёрнутое состояние */
+    .main-window.minimized .window-body,
+    .main-window.minimized [role="menubar"],
+    .main-window.minimized .status-bar {
+      display: none !important;
+    }
+
+    /* ── ПРОФИЛЬ ── */
+    .profile-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .avatar-wrap { flex-shrink: 0; }
+    .avatar-wrap img,
+    .avatar-fallback {
+      width: 76px; height: 76px;
+      border-radius: 4px;
+      display: block;
+      border: 2px solid rgba(80, 120, 200, 0.6);
+      box-shadow: 1px 1px 8px rgba(0,0,0,0.6);
+    }
+    .avatar-fallback {
+      background: linear-gradient(135deg, #1a2540, #0d1a38);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+    }
+    .profile-info h2 {
+      font-size: 17px; font-weight: bold;
+      color: rgba(200, 225, 255, 0.95); margin-bottom: 3px;
+    }
+    .profile-info .subtitle { font-size: 12px; color: rgba(140, 170, 220, 0.85); margin-bottom: 2px; }
+    .tags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .win-tag {
+      font-size: 10px;
+      background: linear-gradient(to bottom, rgba(40,60,110,0.8), rgba(25,38,80,0.9));
+      border: 1px solid rgba(80,120,200,0.5); border-radius: 2px;
+      padding: 1px 7px; color: rgba(180, 210, 255, 0.9);
+    }
+    .about-text { font-size: 13px; line-height: 1.72; color: rgba(190, 210, 245, 0.9); user-select: text; }
+    .about-text strong { color: rgba(130, 180, 255, 0.95); }
+
+    /* Контакты */
+    .contacts-row {
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap;
+      gap: 10px; margin-top: 14px;
+    }
+    .contact-pair { display: flex; gap: 20px; flex-wrap: wrap; }
+    .c-item { display: flex; flex-direction: column; gap: 2px; }
+    .c-item .lbl { font-size: 10px; text-transform: uppercase; color: rgba(100, 140, 200, 0.8); letter-spacing: 1px; }
+    .c-item .val { font-size: 13px; font-weight: bold; color: rgba(130, 180, 255, 0.95); }
+
+    /* fieldset тёмный */
+    .main-window fieldset {
+      border-color: rgba(60, 90, 160, 0.5) !important;
+    }
+    .main-window fieldset legend {
+      color: rgba(160, 200, 255, 0.9) !important;
+      background: rgba(15, 19, 30, 0.88) !important;
+      padding: 0 4px !important;
+    }
+
+    /* ── ПАНЕЛИ ── */
+    .panel-more { display: none; flex-direction: column; }
+    .panel-more.show { display: flex; }
+    .panel-main.hide { display: none; }
+
+    .more-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 12px; flex-shrink: 0;
+    }
+    .more-header strong { font-size: 14px; color: rgba(200, 220, 255, 0.9); }
+
+    .more-scroll {
+      overflow-y: auto;
+      max-height: 52vh;
+      padding-right: 2px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(60,100,180,0.7) rgba(15,20,40,0.6);
+    }
+    .more-scroll::-webkit-scrollbar { width: 8px; }
+    .more-scroll::-webkit-scrollbar-track { background: rgba(15,20,40,0.6); }
+    .more-scroll::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, rgba(80,130,220,0.7), rgba(40,80,160,0.8));
+      border-radius: 2px;
+    }
+
+    .more-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .more-grid fieldset.full { grid-column: 1 / -1; }
+
+    /* ── TASKBAR — тёмный стеклянный Aero ── */
+    .taskbar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 38px;
+      background: linear-gradient(to bottom,
+        rgba(80, 120, 200, 0.38) 0%,
+        rgba(40, 70, 150, 0.52) 40%,
+        rgba(10, 20, 60, 0.72) 100%);
+      backdrop-filter: blur(16px) saturate(1.8);
+      -webkit-backdrop-filter: blur(16px) saturate(1.8);
+      border-top: 1px solid rgba(100, 150, 255, 0.30);
+      box-shadow: 0 -1px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(160,200,255,0.20);
+      display: flex;
+      align-items: center;
+      padding: 0 4px 0 0;
+      gap: 3px;
+      z-index: 1000;
+      overflow: visible;
+    }
+
+    /* ── СТРОКИ ПРОВОДНИКА КОРЗИНЫ ── */
+    .trash-row {
+      display: grid;
+      grid-template-columns: 1fr 90px 90px 100px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: rgba(190, 215, 255, 0.88);
+      border-radius: 2px;
+      cursor: default;
+      transition: background 0.1s;
+    }
+    .trash-row:hover { background: rgba(60,100,200,0.25); }
+    .trash-row:active { background: rgba(60,100,200,0.45); }
+
+    /* ── AERO ДИАЛОГИ (ошибка пуска + о программе) ── */
+    .aero-dialog {
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.18),
+        0 0 28px rgba(60,120,255,0.22),
+        0 14px 40px rgba(0,0,0,0.75) !important;
+      /* Лёгкое синеватое свечение рамки как у Aero */
+      outline: 1px solid rgba(80,140,255,0.25);
+    }
+
+    /* Тайтлбар — такой же glass как у главного окна, уже есть от 7.css glass-класса */
+
+    /* Body диалога — тёмный полупрозрачный как main-window */
+    .aero-dialog-body {
+      background: rgba(15, 19, 30, 0.82) !important;
+      backdrop-filter: blur(18px) saturate(1.6) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(1.6) !important;
+    }
+
+    /* Fieldset внутри диалога */
+    .aero-dialog-fieldset {
+      border-color: rgba(60, 90, 160, 0.5) !important;
+    }
+    .aero-dialog-fieldset legend {
+      color: rgba(160, 200, 255, 0.9) !important;
+      background: rgba(15, 19, 30, 0.82) !important;
+      padding: 0 4px !important;
+    }
+
+    /* Кнопки диалога — такой же стиль как у main-window */
+    .aero-dialog-btn {
+      background: linear-gradient(to bottom, rgba(40,60,110,0.9), rgba(20,35,75,0.95)) !important;
+      border-color: rgba(70,110,200,0.6) !important;
+      color: rgba(200,220,255,0.9) !important;
+      box-shadow: inset 0 1px 0 rgba(120,160,255,0.2) !important;
+    }
+    .aero-dialog-btn:hover {
+      background: linear-gradient(to bottom, rgba(55,80,145,0.9), rgba(30,50,105,0.95)) !important;
+      border-color: rgba(100,150,255,0.7) !important;
+    }
+    .aero-dialog-btn:active {
+      background: linear-gradient(to bottom, rgba(20,35,80,0.95), rgba(35,55,120,0.9)) !important;
+    }
+    .aero-dialog-btn.default {
+      border-color: rgba(100,150,255,0.8) !important;
+      box-shadow: 0 0 0 1px rgba(80,130,220,0.4), inset 0 1px 0 rgba(120,160,255,0.2) !important;
+    }
+
+    /* ── КНОПКА ПУСК — строго круглая ── */
+    .start-btn {
+      /* Фиксированный одинаковый width и height — ключ к кругу */
+      width: 46px;
+      height: 46px;
+      min-width: 46px;
+      min-height: 46px;
+      border-radius: 50% !important;
+      overflow: visible;
+      flex-shrink: 0;
+      padding: 0;
+      margin-left: 5px;
+      margin-bottom: 8px; /* выступает над таскбаром */
+      cursor: default;
+      position: relative;
+      z-index: 1001;
+      /* Синий градиент как Win7 */
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 50% 100%, rgba(0,20,80,0.4) 0%, transparent 60%),
+        linear-gradient(180deg, #3a7ad4 0%, #1850b0 45%, #0c3490 100%);
+      border: 2px solid rgba(20, 60, 160, 0.85);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.20),
+        0 4px 14px rgba(0,0,0,0.55);
+      /* Убираем все браузерные стили кнопки */
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Переход только box-shadow, без фона — чтобы не было глюков */
+      transition: box-shadow 0.12s ease;
+    }
+
+    /* Отключаем квадратные рамки от 7.css */
+    .start-btn::before,
+    .start-btn::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    /* Убиваем ВСЕ переопределения от 7.css и браузера */
+    .start-btn:hover,
+    .start-btn:focus,
+    .start-btn:focus-visible,
+    .start-btn:focus-within,
+    .start-btn:visited,
+    .start-btn.active,
+    .start-btn:hover:not(:active) {
+      width: 46px !important;
+      height: 46px !important;
+      min-width: 46px !important;
+      min-height: 46px !important;
+      border-radius: 50% !important;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 50% 100%, rgba(0,20,80,0.4) 0%, transparent 60%),
+        linear-gradient(180deg, #3a7ad4 0%, #1850b0 45%, #0c3490 100%) !important;
+      border: 2px solid rgba(20, 60, 160, 0.85) !important;
+      outline: none !important;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.30),
+        0 0 18px rgba(80, 150, 255, 0.60),
+        0 4px 14px rgba(0,0,0,0.55) !important;
+    }
+    .start-btn:active {
+      width: 46px !important;
+      height: 46px !important;
+      min-width: 46px !important;
+      min-height: 46px !important;
+      border-radius: 50% !important;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 55%),
+        linear-gradient(180deg, #1850b0 0%, #0a2870 100%) !important;
+      border: 2px solid rgba(20, 60, 160, 0.85) !important;
+      outline: none !important;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.15),
+        0 1px 6px rgba(0,0,0,0.7) !important;
+    }
+    .start-btn:focus { outline: none !important; }
+    .start-btn img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
+
+    /* ── КНОПКА ОКНА В ТАСКБАРЕ ── */
+    .taskbar-btn {
+      height: 26px;
+      padding: 0 10px;
+      background: linear-gradient(to bottom,
+        rgba(255,255,255,0.22) 0%,
+        rgba(255,255,255,0.06) 100%);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 3px;
+      color: white;
+      font-size: 12px;
+      cursor: default;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background 0.1s;
+    }
+    .taskbar-btn:hover {
+      background: linear-gradient(to bottom,
+        rgba(255,255,255,0.32) 0%,
+        rgba(255,255,255,0.14) 100%);
+    }
+    .taskbar-btn.minimized-state {
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0.22) 0%,
+        rgba(255,255,255,0.05) 100%);
+      border-color: rgba(0,0,0,0.30);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
+    }
+
+    /* ── ТРЕЙ ── */
+    .taskbar-tray {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 12px;
+      border-left: 1px solid rgba(255,255,255,0.12);
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+      cursor: default;
+      flex-shrink: 0;
+    }
+    .tray-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+    .tray-time { font-size: 12px; font-weight: 600; line-height: 1; }
+    .tray-date { font-size: 10px; line-height: 1; opacity: 0.85; }
+
+    /* ── ТЁМНЫЕ КНОПКИ (override 7.css) ── */
+    .main-window button:not(.title-bar-controls button) {
+      background: linear-gradient(to bottom, rgba(40,60,110,0.9), rgba(20,35,75,0.95)) !important;
+      border-color: rgba(70,110,200,0.6) !important;
+      color: rgba(200,220,255,0.9) !important;
+      box-shadow: inset 0 1px 0 rgba(120,160,255,0.2) !important;
+    }
+    .main-window button:not(.title-bar-controls button):hover {
+      background: linear-gradient(to bottom, rgba(55,80,145,0.9), rgba(30,50,105,0.95)) !important;
+      border-color: rgba(100,150,255,0.7) !important;
+    }
+    .main-window button:not(.title-bar-controls button):active {
+      background: linear-gradient(to bottom, rgba(20,35,80,0.95), rgba(35,55,120,0.9)) !important;
+    }
+    .main-window button.default:not(.title-bar-controls button) {
+      border-color: rgba(100,150,255,0.8) !important;
+      box-shadow: 0 0 0 1px rgba(80,130,220,0.4), inset 0 1px 0 rgba(120,160,255,0.2) !important;
+    }
+
+    /* ── MEDIA PLAYER (Windows Media Player style) ── */
+    .player-window {
+      position: fixed;
+      width: 380px;
+      z-index: 99;
+      animation: windowIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .player-window .title-bar { cursor: move; }
+
+    /* Всё тело — чёрное */
+    .player-window .window-body {
+      background: #000 !important;
+      padding: 0 !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Главная зона — тёмный фон с синим свечением как в WMP */
+    .wmp-stage {
+      flex: 1;
+      min-height: 180px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 30% 60%, rgba(0, 60, 140, 0.55) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 35%, rgba(0, 30, 100, 0.45) 0%, transparent 50%),
+        radial-gradient(ellipse at 55% 80%, rgba(0, 20, 80, 0.35) 0%, transparent 40%),
+        #030810;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 24px 16px 20px;
+    }
+
+    /* Анимация свечения когда играет — CSS only */
+    .wmp-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(0, 80, 200, 0.22) 0%, transparent 65%);
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    .player-window.playing .wmp-stage::before { opacity: 1; }
+
+    /* Пульс-кольцо — CSS анимация без JS */
+    .wmp-stage::after {
+      content: '';
+      position: absolute;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 120, 255, 0.0);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      transition: none;
+    }
+    .player-window.playing .wmp-stage::after {
+      animation: wmpPulse 2.4s ease-out infinite;
+      border-color: rgba(0, 120, 255, 0.5);
+    }
+    @keyframes wmpPulse {
+      0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0.7; }
+      100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+    }
+
+    /* Обложка */
+    .wmp-cover {
+      width: 96px; height: 96px;
+      border-radius: 4px;
+      border: 1px solid rgba(60,120,255,0.3);
+      box-shadow: 0 0 18px rgba(0,80,200,0.5), 0 4px 12px rgba(0,0,0,0.7);
+      background: linear-gradient(135deg, #0a1428, #1a3060);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .wmp-cover img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .wmp-track-info {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .wmp-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(220,235,255,0.95);
+      text-shadow: 0 0 10px rgba(80,160,255,0.6), 0 1px 4px rgba(0,0,0,0.9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 320px;
+    }
+    .wmp-artist {
+      font-size: 11px;
+      color: rgba(100,160,230,0.75);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 320px;
+    }
+
+    /* ── Панель управления снизу — тёмно-серая как в WMP ── */
+    .wmp-controls-bar {
+      background: linear-gradient(to bottom, #1a1a1a 0%, #0f0f0f 100%);
+      border-top: 1px solid #2a2a2a;
+      padding: 8px 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Прогресс-бар */
+    .wmp-progress-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .wmp-time {
+      font-size: 10px;
+      color: #888;
+      min-width: 32px;
+      flex-shrink: 0;
+      font-family: monospace;
+    }
+    .wmp-time.right { text-align: right; }
+    .wmp-seek {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: #333;
+      outline: none;
+      cursor: pointer;
+    }
+    .wmp-seek::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #6ab0ff, #1060d0);
+      box-shadow: 0 0 5px rgba(60,140,255,0.7);
+      cursor: pointer;
+    }
+    .wmp-seek::-moz-range-thumb {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #1060d0;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Кнопки + громкость в одну строку */
+    .wmp-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .wmp-btns {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .wmp-btns button {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      color: #aaa !important;
+      font-size: 14px;
+      width: 30px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 3px !important;
+      cursor: default;
+      transition: color 0.1s, background 0.1s !important;
+      padding: 0 !important;
+    }
+    .wmp-btns button:hover { color: #fff !important; background: rgba(255,255,255,0.08) !important; }
+    .wmp-btns button:active { background: rgba(255,255,255,0.15) !important; }
+
+    /* Кнопка play — синий круг */
+    .wmp-btn-play {
+      width: 36px !important; height: 36px !important;
+      border-radius: 50% !important;
+      font-size: 16px !important;
+      color: #fff !important;
+      background: radial-gradient(circle at 40% 35%,
+        rgba(80,160,255,0.9),
+        rgba(10,70,180,0.95)) !important;
+      box-shadow: 0 0 10px rgba(40,120,255,0.5), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+    }
+    .wmp-btn-play:hover {
+      background: radial-gradient(circle at 40% 35%,
+        rgba(100,180,255,0.95),
+        rgba(20,90,210,0.95)) !important;
+      box-shadow: 0 0 16px rgba(60,140,255,0.7), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+    }
+
+    /* Громкость — вертикальная через rotate */
+    .wmp-vol-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .wmp-vol-icon { font-size: 14px; color: #888; }
+    .wmp-vol-wrap {
+      width: 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wmp-vol {
+      width: 70px;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 3px;
+      background: #444;
+      outline: none;
+      cursor: pointer;
+      transform: rotate(-90deg);
+      transform-origin: center center;
+    }
+    .wmp-vol::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #6ab0ff, #1060d0);
+      box-shadow: 0 0 6px rgba(60,140,255,0.7);
+      cursor: pointer;
+    }
+    .wmp-vol::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #1060d0;
+      border: none;
+      cursor: pointer;
+    }
+    .player-window.minimized .window-body { display: none !important; }
+    /* ── /MEDIA PLAYER ── */
+    @media (max-width: 600px) {
+      .desktop-icons { display: none; }
+      .main-window { width: calc(100vw - 12px) !important; }
+      .more-grid { grid-template-columns: 1fr; }
+      .more-grid fieldset.full { grid-column: 1; }
+      .more-scroll { max-height: 55vh; }
+      .profile-row { flex-direction: column; align-items: center; text-align: center; }
+      .tags-row { justify-content: center; }
+      .contacts-row { flex-direction: column; align-items: flex-start; }
+      .title-bar-text { font-size: 11px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+      [role="menubar"] { overflow-x: auto; flex-wrap: nowrap !important; }
+      .taskbar-btn { display: none; }
+      .start-btn { width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
+      .start-btn img { width: 22px; height: 22px; }
+
+      /* Плеер на мобиле — полная ширина, снизу над таскбаром */
+      .player-window {
+        width: calc(100vw - 12px) !important;
+        right: 6px !important;
+        left: 6px !important;
+        bottom: 48px !important;
+        top: auto !important;
+      }
+      /* На мобиле stage поменьше, без лишней высоты */
+      .wmp-stage { min-height: 120px !important; padding: 14px 12px !important; }
+      .wmp-cover { width: 72px !important; height: 72px !important; font-size: 30px !important; }
+      .wmp-vol { width: 80px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="desktop-icons">
+  <div class="d-icon" ondblclick="openMyPC()" title="Мой компьютер"><div class="emoji">🖥️</div><span>Мой компьютер</span></div>
+  <div class="d-icon" ondblclick="openDocs()" title="Документы"><div class="emoji">📁</div><span>Документы</span></div>
+  <div class="d-icon" ondblclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ','_blank')" title="Корзина"><div class="emoji">🗑️</div><span>Корзина</span></div>
+</div>
+
+<div class="window glass active main-window" id="mainWindow" style="--w7-w-bg: #1a2d52;">
+
+  <div class="title-bar" id="titleBar">
+    <div class="title-bar-text">🌐 klevvid.ru — Визитная карточка</div>
+    <div class="title-bar-controls">
+      <button aria-label="Minimize" id="btnMinimize"></button>
+      <button aria-label="Maximize"></button>
+      <button aria-label="Close"></button>
+    </div>
+  </div>
+
+  <ul role="menubar" class="can-hover">
+    <li role="menuitem" tabindex="0" aria-haspopup="true">Файл
+      <ul role="menu">
+        <li role="menuitem"><a href="#">Сохранить контакт</a></li>
+        <li role="menuitem" class="has-divider"><a href="#">Печать...</a></li>
+        <li role="menuitem"><a href="#">Выход</a></li>
+      </ul>
+    </li>
+    <li role="menuitem" tabindex="0" aria-haspopup="true">Вид
+      <ul role="menu">
+        <li role="menuitem"><a href="#" id="menuMain">Главная</a></li>
+        <li role="menuitem"><a href="#" id="menuMore">Подробнее</a></li>
+      </ul>
+    </li>
+    <li role="menuitem" tabindex="0" aria-haspopup="true">Справка
+      <ul role="menu">
+        <li role="menuitem"><a href="#" onclick="openAbout(event)">О программе</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="window-body has-space">
+
+    <div class="panel-main" id="panelMain">
+
+      <div class="profile-row">
+        <div class="avatar-wrap">
+          <img src="avatar.png" alt="KlevVid"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="avatar-fallback" style="display:none">🦊</div>
+        </div>
+        <div class="profile-info">
+          <h2>KlevVid (Дмитрий)</h2>
+          <div class="subtitle">геймер · разработчик · концентрат счастья</div>
+          <div class="subtitle">16 лет · КСК, 1 курс · Новошахтинск</div>
+          <div class="tags-row">
+            <span class="win-tag">Python</span>
+            <span class="win-tag">Linux</span>
+            <span class="win-tag">LLM</span>
+            <span class="win-tag">Furry 🦊</span>
+          </div>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend>Обо мне</legend>
+        <p class="about-text">
+          Привет, я <strong>Дмитрий</strong> —           интересуюсь компьютерами и почти всем что с ними связано. Делаю штуки которые мне интересны. Иногда они работают. А так же люблю поиграть во всякие игры.<br><br>
+          Открыт к общению, новым знакомствам и интересным предложениям. Имею немного специфические взгляды на некоторые темы.<br>
+          Советую почитать раздел "Подробнее" по кнопке ниже
+        </p>
+      </fieldset>
+
+      <div class="contacts-row">
+        <div class="contact-pair">
+          <div class="c-item">
+            <span class="lbl">Discord</span>
+            <span class="val">klevvid</span>
+          </div>
+          <div class="c-item">
+            <span class="lbl">Telegram</span>
+            <span class="val">@KlevVid</span>
+          </div>
+        </div>
+        <button class="default" id="btnMore">Подробнее →</button>
+      </div>
+
+    </div><div class="panel-more" id="panelMore">
+
+      <div class="more-header">
+        <button id="btnBack">← Назад</button>
+        <strong>Подробнее обо мне</strong>
+      </div>
+
+      <div class="more-scroll">
+        <div class="more-grid">
+
+          <fieldset>
+            <legend>Кто я</legend>
+            <p class="about-text">
+              Мне <strong>16 лет</strong>, учусь на КСК — компьютерные системы и комплексы. Люблю некоторые старые технологии, технику и игры.<br>
+              В некотором роде меня привлекает фурри сообщество (вот тут прошу без негатива).<br>
+              Прям конкретно свои цели сказать не могу, так как сам не определился. Просто плыву по течению и не парюсь.<br>
+              Стараюсь быть открытым, позитивным и искренним.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Немного инфы</legend>
+            <p class="about-text">
+              Я создал этот сайт по двум причинам:<br>
+              1. Свой сайт — более громкий способ заявить миру о себе чем соцсети.<br>
+              2. Просто хочу побольше общения с разными людьми.<br><br>
+              Некоторое время ощущал что-то типа конфликта личностей. В итоге просто решил полностью отдаться позитивному внутреннему "Я". Поэтому и стал более открытым и в целом счастливым.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Плюсы</legend>
+            <p class="about-text">
+              Быстро разбираюсь в новых технологиях, хорошо работаю в команде.
+              Несмотря на некоторые недостатки достаточно общительный и позитивный человек.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>А минусы?</legend>
+            <p class="about-text">
+              Достаточно стеснительный в общении хоть и открытый человек <br>
+              Редко начинаю диалог первым.
+            </p>
+          </fieldset>
+
+          <fieldset class="full">
+            <legend>Открыт к</legend>
+            <p class="about-text">
+              Любому виду общения.<br>
+              Всегда рад просто поговорить с людьми на любую тему))
+            </p>
+          </fieldset>
+
+        </div>
+      </div></div></div><div class="status-bar">
+    <p class="status-bar-field">🟢 Онлайн</p>
+    <p class="status-bar-field">klevvid.ru</p>
+    <p class="status-bar-field" id="statusClock">00:00</p>
+  </div>
+
+</div><!-- ── MEDIA PLAYER WINDOW ── -->
+<div class="window glass active player-window" id="playerWindow" style="--w7-w-bg: #111;">
+  <div class="title-bar" id="playerTitleBar">
+    <div class="title-bar-text">▶ Windows Media Player</div>
+    <div class="title-bar-controls">
+      <button aria-label="Minimize" id="playerMinimize"></button>
+      <button aria-label="Maximize"></button>
+      <button aria-label="Close" onclick="document.getElementById('playerWindow').style.display='none';document.getElementById('taskbarBtnPlayer').style.display='none';"></button>
+    </div>
+  </div>
+  <div class="window-body">
+
+    <!-- Зона визуализации -->
+    <div class="wmp-stage" id="wmpStage">
+      <div class="wmp-cover" id="playerCover">
+        <img src="" id="playerCoverImg" style="display:none" alt="">
+        <span id="playerCoverFallback">🎵</span>
+      </div>
+      <div class="wmp-track-info">
+        <div class="wmp-title" id="playerTitle">Нет трека</div>
+        <div class="wmp-artist" id="playerArtist">—</div>
+      </div>
+    </div>
+
+    <!-- Панель управления -->
+    <div class="wmp-controls-bar">
+      <div class="wmp-progress-row">
+        <span class="wmp-time" id="playerCurrent">0:00</span>
+        <input type="range" class="wmp-seek" id="playerProgress" value="0" min="0" max="100" step="0.1">
+        <span class="wmp-time right" id="playerDuration">0:00</span>
+      </div>
+      <div class="wmp-bottom-row">
+        <div class="wmp-btns">
+          <button id="btnPrev" title="Предыдущий">⏮</button>
+          <button id="btnPlay" class="wmp-btn-play" title="Играть">▶</button>
+          <button id="btnNext" title="Следующий">⏭</button>
+          <button id="btnStop" title="Стоп">⏹</button>
+        </div>
+        <div class="wmp-vol-row">
+          <span class="wmp-vol-icon">🔈</span>
+          <div class="wmp-vol-wrap">
+            <input type="range" class="wmp-vol" id="playerVolume" value="80" min="0" max="100">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ ДОКУМЕНТЫ — ПРОВОДНИК ══ -->
+<div id="docsOverlay" style="display:none;position:fixed;inset:0;z-index:9996;background:transparent;">
+  <div class="window glass active aero-dialog" id="docsDialog" style="position:absolute;width:560px;--w7-w-bg:#1a2d52;animation:windowIn 0.2s cubic-bezier(0.22,1,0.36,1) both;">
+
+    <div class="title-bar" id="docsTitleBar" style="cursor:move;">
+      <div class="title-bar-text">📄 Документы</div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" onclick="docsMin()"></button>
+        <button aria-label="Maximize"></button>
+        <button aria-label="Close" onclick="closeDocs()"></button>
+      </div>
+    </div>
+
+    <!-- Меню проводника -->
+    <div style="background:rgba(20,28,50,0.8);backdrop-filter:blur(8px);border-bottom:1px solid rgba(60,90,160,0.35);padding:2px 6px;display:flex;gap:2px;">
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Файл</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Правка</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Вид</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Сервис</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Справка</span>
+    </div>
+
+    <!-- Адресная строка -->
+    <div style="background:rgba(15,20,40,0.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(60,90,160,0.3);padding:4px 8px;display:flex;align-items:center;gap:6px;">
+      <button class="aero-dialog-btn" style="font-size:11px;padding:1px 8px;">◀</button>
+      <button class="aero-dialog-btn" style="font-size:11px;padding:1px 8px;">▶</button>
+      <div style="flex:1;background:rgba(10,15,35,0.8);border:1px solid rgba(60,100,180,0.5);border-radius:2px;padding:2px 8px;font-size:12px;color:rgba(180,210,255,0.85);font-family:monospace;">
+        📄 Документы
+      </div>
+      <button class="aero-dialog-btn" style="font-size:11px;padding:1px 10px;">Поиск</button>
+    </div>
+
+    <!-- Тулбар -->
+    <div style="background:rgba(18,25,48,0.6);backdrop-filter:blur(6px);border-bottom:1px solid rgba(60,90,160,0.25);padding:4px 8px;display:flex;align-items:center;gap:6px;">
+      <span style="font-size:11px;color:rgba(160,190,240,0.7);">Упорядочить ▾</span>
+      <div style="width:1px;height:16px;background:rgba(100,140,220,0.3);margin:0 2px;"></div>
+      <span style="font-size:11px;color:rgba(160,190,240,0.7);">Общий доступ ▾</span>
+    </div>
+
+    <div class="window-body aero-dialog-body" style="padding:0;display:flex;min-height:220px;">
+
+      <!-- Левая панель -->
+      <div style="width:140px;flex-shrink:0;border-right:1px solid rgba(60,90,160,0.3);padding:8px 6px;font-size:11px;color:rgba(140,170,220,0.8);">
+        <div style="margin-bottom:6px;color:rgba(160,200,255,0.6);font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:1px;">Избранное</div>
+        <div style="padding:3px 6px;cursor:default;">🖥️ Рабочий стол</div>
+        <div style="padding:3px 6px;cursor:default;">📥 Загрузки</div>
+        <div style="padding:3px 6px;cursor:default;background:rgba(60,100,200,0.25);border-radius:2px;">📄 Документы</div>
+        <div style="margin-top:8px;margin-bottom:6px;color:rgba(160,200,255,0.6);font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:1px;">Компьютер</div>
+        <div style="padding:3px 6px;cursor:default;">💾 Диск (C:)</div>
+        <div style="padding:3px 6px;cursor:default;">💾 Диск (D:)</div>
+      </div>
+
+      <!-- Правая панель — содержимое -->
+      <div style="flex:1;padding:6px 4px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(60,100,180,0.7) rgba(15,20,40,0.6);">
+
+        <!-- Заголовки колонок -->
+        <div style="display:grid;grid-template-columns:1fr 90px 90px 110px;padding:2px 8px;font-size:11px;color:rgba(120,160,220,0.7);border-bottom:1px solid rgba(60,90,160,0.25);margin-bottom:2px;">
+          <span>Имя</span><span>Тип</span><span>Размер</span><span>Дата изменения</span>
+        </div>
+
+        <!-- Папки -->
+        <div class="trash-row" ondblclick="openFileError('волгоград','НЕТ ДОСТУПА\n\nAccess is denied.\n\nВолгоград 2023\n\nОтказано в доступе к папке.')">
+          <span>📁 Волгоград 2023</span><span>Папка</span><span>—</span><span>13.04.2023</span>
+        </div>
+        <div class="trash-row" ondblclick="openFileError('ростов','НЕТ ДОСТУПА\n\nAccess is denied.\n\nРостов\n\nОтказано в доступе к папке.')">
+          <span>📁 Ростов</span><span>Папка</span><span>—</span><span>07.09.2024</span>
+        </div>
+        <div class="trash-row" ondblclick="openDomashka()">
+          <span>📁 Домашка</span><span>Папка</span><span>1 488 ТБ</span><span>01.09.2025</span>
+        </div>
+
+        <!-- Файлы -->
+        <div class="trash-row" ondblclick="openFileError('база','НЕТ ДОСТУПА\n\nAccess is denied.\n\nПроект «БАЗА».py\n\nОтказано в доступе к файлу.')">
+          <span>🐍 Проект «БАЗА».py</span><span>.py</span><span id="sizeBase">...</span><span>вчера</span>
+        </div>
+        <div class="trash-row" ondblclick="openFileError('паспорт','НЕТ ДОСТУПА\n\nAccess is denied.\n\nскан паспорта.jpg\n\nОтказано в доступе к файлу.')">
+          <span>🖼️ скан паспорта.jpg</span><span>.jpg</span><span id="sizePasport">...</span><span>давно</span>
+        </div>
+        <div class="trash-row" ondblclick="openFileError('реквизиты','НЕТ ДОСТУПА\n\nAccess is denied.\n\nреквизиты.txt\n\nОтказано в доступе к файлу.')">
+          <span>📄 реквизиты.txt</span><span>.txt</span><span id="sizeReq">...</span><span>никогда</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Статусбар -->
+    <div style="background:rgba(12,16,30,0.85);backdrop-filter:blur(8px);border-top:1px solid rgba(60,90,160,0.35);padding:3px 10px;font-size:11px;color:rgba(140,170,220,0.75);display:flex;justify-content:space-between;">
+      <span>Объектов: 6</span>
+      <span>Общий размер: очень много</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ КОРЗИНА — ПУСТАЯ ══ -->
+<div id="trashOverlay" style="display:none;position:fixed;inset:0;z-index:9996;background:transparent;">
+  <div class="window glass active aero-dialog" id="trashDialog" style="position:absolute;width:420px;--w7-w-bg:#1a2d52;animation:windowIn 0.2s cubic-bezier(0.22,1,0.36,1) both;">
+    <div class="title-bar" id="trashTitleBar" style="cursor:move;">
+      <div class="title-bar-text">🗑️ Корзина</div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize"></button>
+        <button aria-label="Maximize"></button>
+        <button aria-label="Close" onclick="closeTrash()"></button>
+      </div>
+    </div>
+    <div style="background:rgba(20,28,50,0.8);backdrop-filter:blur(8px);border-bottom:1px solid rgba(60,90,160,0.35);padding:2px 6px;display:flex;gap:2px;">
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Файл</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Правка</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Вид</span>
+    </div>
+    <div class="window-body aero-dialog-body" style="min-height:140px;display:flex;align-items:center;justify-content:center;">
+      <div style="text-align:center;color:rgba(140,170,220,0.6);font-size:13px;">
+        <div style="font-size:42px;margin-bottom:10px;">🗑️</div>
+        Корзина пуста<br>
+        <span style="font-size:11px;opacity:0.6;">А ты зачем сюда зашёл?</span>
+      </div>
+    </div>
+    <div style="background:rgba(12,16,30,0.85);border-top:1px solid rgba(60,90,160,0.35);padding:3px 10px;font-size:11px;color:rgba(140,170,220,0.75);">Объектов: 0</div>
+  </div>
+</div>
+
+<!-- Диалог пустой папки -->
+<div id="subFolderOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:transparent;">
+  <div class="window glass active aero-dialog" id="subFolderDialog" style="position:absolute;width:380px;--w7-w-bg:#1a2d52;animation:windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
+    <div class="title-bar" id="subFolderTitleBar" style="cursor:move;">
+      <div class="title-bar-text" id="subFolderTitle">📁 Папка</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="closeSubFolder()"></button>
+      </div>
+    </div>
+    <div style="background:rgba(20,28,50,0.8);backdrop-filter:blur(8px);border-bottom:1px solid rgba(60,90,160,0.35);padding:2px 6px;display:flex;gap:2px;">
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Файл</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Правка</span>
+      <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Вид</span>
+    </div>
+    <div class="window-body aero-dialog-body" style="min-height:120px;display:flex;align-items:center;justify-content:center;">
+      <div style="text-align:center;color:rgba(140,170,220,0.6);font-size:13px;">
+        <div style="font-size:36px;margin-bottom:8px;">📭</div>
+        Папка пуста
+      </div>
+    </div>
+    <div style="background:rgba(12,16,30,0.85);border-top:1px solid rgba(60,90,160,0.35);padding:3px 10px;font-size:11px;color:rgba(140,170,220,0.75);">Объектов: 0</div>
+  </div>
+</div>
+
+<!-- Диалог "Домашка" — бесконечная загрузка -->
+<div id="domashkaOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:transparent;">
+  <div class="window glass active aero-dialog" id="domashkaDialog" style="position:absolute;width:400px;--w7-w-bg:#1a2d52;animation:windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
+    <div class="title-bar" id="domashkaTitleBar" style="cursor:move;">
+      <div class="title-bar-text">📁 Домашка — Открытие...</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="closeDomashka()"></button>
+      </div>
+    </div>
+    <div class="window-body aero-dialog-body" style="padding:20px 24px 16px;">
+      <p style="font-size:13px;color:rgba(190,210,245,0.9);margin:0 0 14px;">
+        Копирование содержимого папки...<br>
+        <span style="font-size:11px;color:rgba(140,170,220,0.7);">Осталось: 1 488 ТБ из 1 488 ТБ</span>
+      </p>
+      <div style="background:rgba(10,15,35,0.8);border:1px solid rgba(60,100,180,0.5);border-radius:2px;height:20px;overflow:hidden;margin-bottom:10px;">
+        <div id="domashkaBar" style="height:100%;width:0%;background:linear-gradient(to right,rgba(40,100,220,0.8),rgba(80,150,255,0.9));transition:width 0.1s linear;"></div>
+      </div>
+      <p style="font-size:11px;color:rgba(140,170,220,0.6);margin:0 0 14px;" id="domashkaStatus">Подготовка...</p>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="aero-dialog-btn" onclick="closeDomashka()">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Диалог ошибки файла -->
+<div id="fileErrorOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:transparent;">
+  <div class="window glass active aero-dialog" id="fileErrorDialog" style="position:absolute;width:360px;--w7-w-bg:#1a2d52;animation:windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
+    <div class="title-bar" style="cursor:default;">
+      <div class="title-bar-text">Ошибка открытия файла</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="closeFileError()"></button>
+      </div>
+    </div>
+    <div class="window-body aero-dialog-body" style="padding:16px 18px;">
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <img src="https://win98icons.alexmeub.com/icons/png/msg_error-0.png"
+          onerror="this.outerHTML='<span style=\'font-size:36px\'>⛔</span>'"
+          width="36" height="36" style="flex-shrink:0;margin-top:2px;image-rendering:pixelated;">
+        <div style="flex:1;">
+          <p id="fileErrorText" style="margin:0 0 14px;font-size:12px;line-height:1.65;color:rgba(190,210,245,0.9);white-space:pre-wrap;"></p>
+          <div style="display:flex;justify-content:center;">
+            <button class="default aero-dialog-btn" onclick="closeFileError()" style="min-width:80px;">ОК</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ОКНО МОЙ КОМПЬЮТЕР -->
+<div id="mypcOverlay" style="display:none; position:fixed; inset:0; z-index:9997; background:transparent;" onclick="if(event.target===this)closeMyPC()">
+  <div class="window glass active aero-dialog" id="mypcDialog" style="position:absolute; width:300px; --w7-w-bg: #1a2d52; animation: windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
+    <div class="title-bar" id="mypcTitleBar" style="cursor:move;">
+      <div class="title-bar-text">🖥️ Мой компьютер</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="closeMyPC()"></button>
+      </div>
+    </div>
+    <div class="window-body aero-dialog-body" style="padding:0;">
+      <!-- Имитация меню блокнота -->
+      <div style="
+        background: rgba(20,28,50,0.75);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid rgba(60,90,160,0.35);
+        padding: 2px 4px;
+        font-size: 12px;
+        color: rgba(200,220,255,0.9);
+        display:flex; gap:12px;
+      ">
+        <span style="padding:2px 6px; cursor:default;">Файл</span>
+        <span style="padding:2px 6px; cursor:default;">Правка</span>
+        <span style="padding:2px 6px; cursor:default;">Вид</span>
+      </div>
+      <!-- Текстовая область -->
+      <pre style="
+        margin:0;
+        padding:14px 16px;
+        font-family:'Courier New', monospace;
+        font-size:12px;
+        line-height:1.8;
+        color:rgba(190,215,255,0.92);
+        background:transparent;
+        white-space:pre-wrap;
+        user-select:text;
+        min-height:160px;
+      ">ASUS PRIME B250 PLUS
+I5-7400
+AMD Radeon RX580 2048SP (8GB)
+24GB RAM
+1.5 TB места суммарно
+
+I use arch btw</pre>
+      <!-- Статусбар -->
+      <div style="
+        background: rgba(12,16,30,0.85);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(60,90,160,0.35);
+        padding: 2px 8px;
+        font-size:11px;
+        color:rgba(140,170,220,0.75);
+      ">Ln 7, Col 1</div>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА О ПРОГРАММЕ -->
+<div id="aboutOverlay" style="display:none; position:fixed; inset:0; z-index:9998; background:rgba(0,0,0,0.18);" onclick="if(event.target===this)closeAbout()">
+  <div class="window glass active aero-dialog" id="aboutDialog" style="position:absolute; width:340px; animation: windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both; --w7-w-bg: #1a2d52;">
+    <div class="title-bar" style="cursor:default;">
+      <div class="title-bar-text">О программе — klevvid.ru</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="closeAbout()"></button>
+      </div>
+    </div>
+    <div class="window-body aero-dialog-body" style="padding:18px 20px 14px;">
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        <span style="font-size:42px; line-height:1;">🦊</span>
+        <div>
+          <div style="font-size:15px; font-weight:bold; margin-bottom:3px; color:rgba(200,225,255,0.95);">klevvid.ru</div>
+          <div style="font-size:11px; color:rgba(140,170,220,0.8);">Версия 2.2.8 (сделано со скуки)</div>
+        </div>
+      </div>
+      <fieldset class="aero-dialog-fieldset" style="margin-bottom:12px;">
+        <legend>Описание</legend>
+        <p style="font-size:12px; line-height:1.6; margin:0; color:rgba(190,210,245,0.9);">
+          Я сделал этот сайт со скуки чисто для себя.<br>
+          Основная цель — новые знакомства.
+        </p>
+      </fieldset>
+      <div style="font-size:11px; text-align:center; color:rgba(140,170,220,0.65); margin-bottom:12px;">©KlevVid &nbsp; 2026</div>
+      <div style="display:flex; justify-content:center;">
+        <button class="default aero-dialog-btn" onclick="closeAbout()" style="min-width:80px;">ОК</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ОШИБКИ ПУСКА -->
+<div id="startErrorOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:transparent;" onclick="closeStartError(event)">
+  <div class="window glass active aero-dialog" id="startErrorDialog" style="position:absolute; width:380px; animation: windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both; --w7-w-bg: #1a2d52;">
+    <div class="title-bar" style="cursor:default;">
+      <div class="title-bar-text">Ошибка выполнения</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="closeStartError(event)"></button>
+      </div>
+    </div>
+    <div class="window-body aero-dialog-body" style="padding:16px 18px;">
+      <div style="display:flex; align-items:flex-start; gap:14px;">
+        <img src="https://win98icons.alexmeub.com/icons/png/msg_error-0.png"
+          onerror="this.outerHTML='<span style=\'font-size:40px\'>⛔</span>'"
+          width="40" height="40" style="flex-shrink:0; margin-top:2px; image-rendering:pixelated;">
+        <div style="flex:1;">
+          <p style="margin:0 0 10px; font-size:13px; line-height:1.55; color:rgba(190,210,245,0.9);">
+            <strong style="color:rgba(200,225,255,0.95);">Меню «Пуск» недоступно.</strong><br><br>
+            А что ты ожидал тут увидеть кроме лени?<br>
+            <span style="font-size:11px; color:rgba(140,170,220,0.7);">LAZINESS_ERROR (0xDEADLAZY)</span>
+          </p>
+          <div style="display:flex; justify-content:center; gap:8px;">
+            <button class="default aero-dialog-btn" onclick="closeStartError(event)" style="min-width:80px;">ОК</button>
+            <button class="aero-dialog-btn" onclick="closeStartError(event)" style="min-width:80px;">Отмена</button>
+            <button class="aero-dialog-btn" onclick="closeStartError(event)" style="min-width:80px;">Закрыть</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ТОСТ ДЛЯ МОБИЛОК В ПОРТРЕТНОЙ ОРИЕНТАЦИИ -->
+<div id="mobileToast" style="
+  display:none;
+  position:fixed;
+  bottom:50px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:99999;
+  width:calc(100vw - 32px);
+  max-width:360px;
+  background:rgba(15,19,30,0.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(80,130,220,0.45);
+  border-radius:4px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07);
+  padding:10px 14px 10px 12px;
+  display:none;
+  align-items:center;
+  gap:10px;
+  animation:toastIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
+">
+  <span style="font-size:22px;flex-shrink:0;">📱</span>
+  <span style="font-size:12px;line-height:1.5;color:rgba(190,215,255,0.9);flex:1;">
+    Настоятельно рекомендую перевернуть телефон, если этого не сделать некоторые интерактивные элементы могут не работать корректно.
+  </span>
+  <button onclick="dismissToast()" style="
+    background:none;
+    border:none;
+    color:rgba(140,170,220,0.7);
+    font-size:16px;
+    cursor:pointer;
+    flex-shrink:0;
+    padding:0 2px;
+    line-height:1;
+  ">✕</button>
+</div>
+
+<style>
+@keyframes toastIn {
+  from { opacity:0; transform:translateX(-50%) translateY(12px); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity:1; transform:translateX(-50%) translateY(0); }
+  to   { opacity:0; transform:translateX(-50%) translateY(12px); }
+}
+</style>
+
+<div class="taskbar">
+
+  <button class="start-btn" title="Пуск" type="button" onclick="openStartError(event)">
+    <img src="start.png" alt=""
+      onerror="this.outerHTML='<span style=\'color:white;font-size:18px;pointer-events:none\'>⊞</span>'">
+  </button>
+
+  <div class="taskbar-btn" id="taskbarBtn" onclick="toggleWindow()">
+    🌐 klevvid.ru
+  </div>
+
+  <div class="taskbar-btn" id="taskbarBtnPlayer" onclick="togglePlayer()">
+    🎵 Media Player
+  </div>
+
+  <div class="taskbar-tray">
+    <div class="tray-inner">
+      <span class="tray-time" id="trayTime">00:00</span>
+      <span class="tray-date" id="trayDate">01.01.2026</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── ДОКУМЕНТЫ ── */
+  function randSize() {
+    const units = ['КБ','МБ','ГБ'];
+    const u = units[Math.floor(Math.random()*units.length)];
+    const v = u === 'КБ' ? (Math.random()*900+50).toFixed(0)
+            : u === 'МБ' ? (Math.random()*800+10).toFixed(1)
+            : (Math.random()*9+0.5).toFixed(2);
+    return v + ' ' + u;
+  }
+
+  function openDocs() {
+    document.getElementById('sizeBase').textContent    = randSize();
+    document.getElementById('sizePasport').textContent = randSize();
+    document.getElementById('sizeReq').textContent     = randSize();
+
+    const overlay = document.getElementById('docsOverlay');
+    const dialog  = document.getElementById('docsDialog');
+    overlay.style.display = 'block';
+    requestAnimationFrame(() => {
+      dialog.style.left = Math.round((window.innerWidth  - dialog.offsetWidth)  / 2) + 'px';
+      dialog.style.top  = Math.round((window.innerHeight - dialog.offsetHeight) / 2) + 'px';
+    });
+  }
+  function closeDocs() { document.getElementById('docsOverlay').style.display = 'none'; }
+  function docsMin()   { closeDocs(); }
+
+  /* ── КОРЗИНА ── */
+  function closeTrash() { document.getElementById('trashOverlay').style.display = 'none'; }
+
+  // Перетаскивание проводника Документы
+  (function(){
+    const bar = document.getElementById('docsTitleBar');
+    const dlg = document.getElementById('docsDialog');
+    let drag=false,ox=0,oy=0;
+    bar.addEventListener('mousedown',e=>{
+      if(e.target.tagName==='BUTTON')return;
+      drag=true; ox=e.clientX-dlg.offsetLeft; oy=e.clientY-dlg.offsetTop; e.preventDefault();
+    });
+    document.addEventListener('mousemove',e=>{
+      if(!drag)return;
+      dlg.style.left=Math.max(0,Math.min(e.clientX-ox,window.innerWidth-dlg.offsetWidth))+'px';
+      dlg.style.top=Math.max(0,Math.min(e.clientY-oy,window.innerHeight-38-dlg.offsetHeight))+'px';
+    });
+    document.addEventListener('mouseup',()=>{drag=false;});
+  })();
+
+  // Пустые папки
+  const subNames = { volgograd:'📁 Волгоград 2023', rostov:'📁 Ростов' };
+  function openSubFolder(id) {
+    document.getElementById('subFolderTitle').textContent = subNames[id] || '📁 Папка';
+    const dlg = document.getElementById('subFolderDialog');
+    document.getElementById('subFolderOverlay').style.display = 'block';
+    requestAnimationFrame(()=>{
+      dlg.style.left = Math.round((window.innerWidth  - dlg.offsetWidth)  / 2) + 'px';
+      dlg.style.top  = Math.round((window.innerHeight - dlg.offsetHeight) / 2) + 'px';
+    });
+  }
+  function closeSubFolder(){ document.getElementById('subFolderOverlay').style.display='none'; }
+
+  // Перетаскивание пустой папки
+  (function(){
+    const bar=document.getElementById('subFolderTitleBar');
+    const dlg=document.getElementById('subFolderDialog');
+    let drag=false,ox=0,oy=0;
+    bar.addEventListener('mousedown',e=>{if(e.target.tagName==='BUTTON')return;drag=true;ox=e.clientX-dlg.offsetLeft;oy=e.clientY-dlg.offsetTop;e.preventDefault();});
+    document.addEventListener('mousemove',e=>{if(!drag)return;dlg.style.left=Math.max(0,Math.min(e.clientX-ox,window.innerWidth-dlg.offsetWidth))+'px';dlg.style.top=Math.max(0,Math.min(e.clientY-oy,window.innerHeight-38-dlg.offsetHeight))+'px';});
+    document.addEventListener('mouseup',()=>{drag=false;});
+  })();
+
+  // Домашка — бесконечный прогрессбар
+  let domashkaTimer = null;
+  let domashkaProgress = 0;
+  const domashkaStatuses = [
+    'Читаю файлы...','Считаю содержимое...','Ещё считаю...','Всё ещё считаю...',
+    'Серьёзно, тут очень много файлов...','Может хватит?','Нет? Ладно...','Продолжаю...',
+    'Загружено 0.0000001 ТБ из 1488 ТБ','Ошибка подсчёта. Начинаю заново.','Загружено 0.0000001 ТБ из 1488 ТБ',
+  ];
+  let statusIdx = 0;
+  function openDomashka() {
+    domashkaProgress = 0;
+    statusIdx = 0;
+    document.getElementById('domashkaBar').style.width = '0%';
+    document.getElementById('domashkaStatus').textContent = 'Подготовка...';
+    const dlg = document.getElementById('domashkaDialog');
+    document.getElementById('domashkaOverlay').style.display = 'block';
+    requestAnimationFrame(()=>{
+      dlg.style.left = Math.round((window.innerWidth  - dlg.offsetWidth)  / 2) + 'px';
+      dlg.style.top  = Math.round((window.innerHeight - dlg.offsetHeight) / 2) + 'px';
+    });
+    clearInterval(domashkaTimer);
+    domashkaTimer = setInterval(()=>{
+      // Прогресс ползёт до ~12% и сбрасывается обратно к 0 — никогда не доходит
+      domashkaProgress += (Math.random() * 0.4);
+      if (domashkaProgress >= 12) { domashkaProgress = 0; }
+      document.getElementById('domashkaBar').style.width = domashkaProgress + '%';
+      document.getElementById('domashkaStatus').textContent = domashkaStatuses[statusIdx % domashkaStatuses.length];
+      statusIdx++;
+    }, 600);
+  }
+  function closeDomashka(){ clearInterval(domashkaTimer); document.getElementById('domashkaOverlay').style.display='none'; }
+
+  // Перетаскивание домашки
+  (function(){
+    const bar=document.getElementById('domashkaTitleBar');
+    const dlg=document.getElementById('domashkaDialog');
+    let drag=false,ox=0,oy=0;
+    bar.addEventListener('mousedown',e=>{if(e.target.tagName==='BUTTON')return;drag=true;ox=e.clientX-dlg.offsetLeft;oy=e.clientY-dlg.offsetTop;e.preventDefault();});
+    document.addEventListener('mousemove',e=>{if(!drag)return;dlg.style.left=Math.max(0,Math.min(e.clientX-ox,window.innerWidth-dlg.offsetWidth))+'px';dlg.style.top=Math.max(0,Math.min(e.clientY-oy,window.innerHeight-38-dlg.offsetHeight))+'px';});
+    document.addEventListener('mouseup',()=>{drag=false;});
+  })();
+
+  // Ошибка файла
+  function openFileError(name, msg) {
+    document.getElementById('fileErrorText').textContent = msg;
+    const dlg = document.getElementById('fileErrorDialog');
+    document.getElementById('fileErrorOverlay').style.display = 'block';
+    requestAnimationFrame(()=>{
+      dlg.style.left = Math.round((window.innerWidth  - dlg.offsetWidth)  / 2) + 'px';
+      dlg.style.top  = Math.round((window.innerHeight - dlg.offsetHeight) / 2) + 'px';
+    });
+  }
+  function closeFileError(){ document.getElementById('fileErrorOverlay').style.display='none'; }
+
+  /* ── МОБИЛЬНЫЙ ТОСТ ── */
+  (function() {
+    const toast = document.getElementById('mobileToast');
+    let dismissed = false;
+
+    function checkOrientation() {
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isMobile && isPortrait && !dismissed) {
+        toast.style.display = 'flex';
+      } else {
+        toast.style.display = 'none';
+      }
+    }
+
+    window.dismissToast = function() {
+      dismissed = true;
+      toast.style.animation = 'toastOut 0.25s ease forwards';
+      setTimeout(() => { toast.style.display = 'none'; }, 260);
+    };
+
+    window.addEventListener('load', checkOrientation);
+    window.addEventListener('resize', checkOrientation);
+    screen.orientation && screen.orientation.addEventListener('change', checkOrientation);
+  })();
+
+  /* ── МОЙ КОМПЬЮТЕР ── */
+  function openMyPC() {
+    const overlay = document.getElementById('mypcOverlay');
+    const dialog  = document.getElementById('mypcDialog');
+    overlay.style.display = 'block';
+    requestAnimationFrame(() => {
+      const dw = dialog.offsetWidth;
+      const dh = dialog.offsetHeight;
+      dialog.style.left = Math.round((window.innerWidth  - dw) / 2) + 'px';
+      dialog.style.top  = Math.round((window.innerHeight - dh) / 2) + 'px';
+    });
+  }
+  function closeMyPC() {
+    document.getElementById('mypcOverlay').style.display = 'none';
+  }
+
+  // Перетаскивание окна Мой компьютер
+  (function() {
+    const bar = document.getElementById('mypcTitleBar');
+    const dlg = document.getElementById('mypcDialog');
+    let drag = false, ox = 0, oy = 0;
+    bar.addEventListener('mousedown', e => {
+      if (e.target.tagName === 'BUTTON') return;
+      drag = true;
+      ox = e.clientX - dlg.offsetLeft;
+      oy = e.clientY - dlg.offsetTop;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', e => {
+      if (!drag) return;
+      dlg.style.left = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - dlg.offsetWidth))  + 'px';
+      dlg.style.top  = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - 38 - dlg.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', () => { drag = false; });
+  })();
+
+  /* ── О ПРОГРАММЕ ── */
+  function openAbout(e) {
+    e && e.preventDefault();
+    const overlay = document.getElementById('aboutOverlay');
+    const dialog  = document.getElementById('aboutDialog');
+    overlay.style.display = 'block';
+    requestAnimationFrame(() => {
+      const dw = dialog.offsetWidth;
+      const dh = dialog.offsetHeight;
+      dialog.style.left = Math.round((window.innerWidth  - dw) / 2) + 'px';
+      dialog.style.top  = Math.round((window.innerHeight - dh) / 2) + 'px';
+    });
+  }
+  function closeAbout() {
+    document.getElementById('aboutOverlay').style.display = 'none';
+  }
+
+  /* ── ОШИБКА ПУСКА ── */
+  function openStartError(e) {
+    const overlay = document.getElementById('startErrorOverlay');
+    const dialog  = document.getElementById('startErrorDialog');
+    overlay.style.display = 'block';
+    // Позиционируем диалог над кнопкой пуск
+    const btn  = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const dw   = 380;
+    let left   = rect.left;
+    let top    = rect.top - 10; // чуть выше, потом JS скорректирует
+    // После рендера — поднимаем выше высоты окна
+    requestAnimationFrame(() => {
+      const dh = dialog.offsetHeight;
+      left = Math.max(8, Math.min(left, window.innerWidth - dw - 8));
+      top  = rect.top - dh - 8;
+      if (top < 8) top = rect.bottom + 8;
+      dialog.style.left = left + 'px';
+      dialog.style.top  = top  + 'px';
+    });
+  }
+  function closeStartError(e) {
+    e.stopPropagation();
+    const overlay = document.getElementById('startErrorOverlay');
+    // Закрываем только если клик по оверлею (не по самому окну), или по кнопкам
+    if (e.currentTarget === overlay && e.target !== overlay) return;
+    overlay.style.display = 'none';
+  }
+
+  /* ── ЧАСЫ ── */
+  function tick() {
+    const n = new Date();
+    const t = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+    const d = n.toLocaleDateString('ru', {day:'2-digit', month:'2-digit', year:'numeric'});
+    document.getElementById('trayTime').textContent = t;
+    document.getElementById('trayDate').textContent = d;
+    document.getElementById('statusClock').textContent = t;
+  }
+  tick(); setInterval(tick, 10000);
+
+  /* ── ЦЕНТРИРОВАНИЕ ОКНА ── */
+  const win = document.getElementById('mainWindow');
+
+  function centerWindow() {
+    const ww = window.innerWidth;
+    const isMobile = ww <= 600;
+    // На мобиле плеер занимает место снизу — учитываем его высоту
+    const playerH = isMobile ? (document.getElementById('playerWindow').offsetHeight || 0) : 0;
+    const wh = window.innerHeight - 38 - playerH;
+    const ow = win.offsetWidth;
+    const oh = win.offsetHeight;
+    win.style.left = Math.max(0, Math.round((ww - ow) / 2)) + 'px';
+    win.style.top  = Math.max(0, Math.round((wh - oh) / 2)) + 'px';
+  }
+
+  // Центрируем после загрузки всего
+  window.addEventListener('load', centerWindow);
+  window.addEventListener('resize', () => {
+    if (!win.classList.contains('minimized')) centerWindow();
+  });
+
+  /* ── ПЕРЕТАСКИВАНИЕ ── */
+  const titleBar = document.getElementById('titleBar');
+  let dragging = false, ox = 0, oy = 0;
+
+  titleBar.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    dragging = true;
+    ox = e.clientX - win.offsetLeft;
+    oy = e.clientY - win.offsetTop;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    let nx = e.clientX - ox;
+    let ny = e.clientY - oy;
+    nx = Math.max(0, Math.min(nx, window.innerWidth - win.offsetWidth));
+    ny = Math.max(0, Math.min(ny, window.innerHeight - 38 - 10));
+    win.style.left = nx + 'px';
+    win.style.top  = ny + 'px';
+  });
+  document.addEventListener('mouseup', () => { dragging = false; });
+
+  // Touch
+  titleBar.addEventListener('touchstart', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    const t = e.touches[0];
+    dragging = true;
+    ox = t.clientX - win.offsetLeft;
+    oy = t.clientY - win.offsetTop;
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    let nx = t.clientX - ox;
+    let ny = t.clientY - oy;
+    nx = Math.max(0, Math.min(nx, window.innerWidth - win.offsetWidth));
+    ny = Math.max(0, Math.min(ny, window.innerHeight - 38 - 10));
+    win.style.left = nx + 'px';
+    win.style.top  = ny + 'px';
+  }, { passive: true });
+  document.addEventListener('touchend', () => { dragging = false; });
+
+  /* ── СВЕРНУТЬ / РАЗВЕРНУТЬ ── */
+  const taskbarBtn = document.getElementById('taskbarBtn');
+
+  function minimize() {
+    win.classList.add('minimized');
+    taskbarBtn.classList.add('minimized-state');
+  }
+  function restore() {
+    win.classList.remove('minimized');
+    taskbarBtn.classList.remove('minimized-state');
+  }
+  function toggleWindow() {
+    win.classList.contains('minimized') ? restore() : minimize();
+  }
+
+  document.getElementById('btnMinimize').addEventListener('click', minimize);
+
+  /* ── ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ── */
+  const panelMain = document.getElementById('panelMain');
+  const panelMore = document.getElementById('panelMore');
+
+  function showMore() { panelMain.classList.add('hide'); panelMore.classList.add('show'); }
+  function showMain() { panelMore.classList.remove('show'); panelMain.classList.remove('hide'); }
+
+  document.getElementById('btnMore').addEventListener('click', showMore);
+  document.getElementById('btnBack').addEventListener('click', showMain);
+  document.getElementById('menuMain').addEventListener('click', e => { e.preventDefault(); showMain(); });
+  document.getElementById('menuMore').addEventListener('click', e => { e.preventDefault(); showMore(); });
+
+  /* ── MEDIA PLAYER ── */
+  const tracks = [
+    // Замени src на свои mp3, cover на обложку (необязательно)
+    { title: 'pathetique.ogg', artist: 'Dirty Fox games', src: 'music/pathetique.ogg', cover: '' },
+    { title: 'Атомная бензопила',                   artist: 'KlevVid', src: 'music/benzopila.mp3', cover: '' },
+    { title: 'СССР',                     artist: 'KlevVid', src: 'music/USSR.mp3', cover: '' },
+  ];
+
+  const audio       = new Audio();
+  let trackIndex    = 0;
+  let isPlaying     = false;
+
+  const playerWin   = document.getElementById('playerWindow');
+  const playerBar   = document.getElementById('playerTitleBar');
+  const btnPlay     = document.getElementById('btnPlay');
+  const btnPrev     = document.getElementById('btnPrev');
+  const btnNext     = document.getElementById('btnNext');
+  const btnStop     = document.getElementById('btnStop');
+  const progress    = document.getElementById('playerProgress');
+  const volume      = document.getElementById('playerVolume');
+  const titleEl     = document.getElementById('playerTitle');
+  const artistEl    = document.getElementById('playerArtist');
+  const currentEl   = document.getElementById('playerCurrent');
+  const durationEl  = document.getElementById('playerDuration');
+  const coverImg    = document.getElementById('playerCoverImg');
+  const coverFall   = document.getElementById('playerCoverFallback');
+  const taskBtnPl   = document.getElementById('taskbarBtnPlayer');
+
+  function fmtTime(s) {
+    if (isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  }
+
+  function loadTrack(idx) {
+    const t = tracks[idx];
+    audio.src = t.src;
+    titleEl.textContent  = t.title;
+    artistEl.textContent = t.artist;
+    progress.value = 0;
+    currentEl.textContent  = '0:00';
+    durationEl.textContent = '0:00';
+    if (t.cover) {
+      coverImg.src = t.cover;
+      coverImg.style.display = 'block';
+      coverFall.style.display = 'none';
+    } else {
+      coverImg.style.display = 'none';
+      coverFall.style.display = 'flex';
+    }
+  }
+
+  function play() {
+    audio.play().catch(() => {});
+    isPlaying = true;
+    btnPlay.textContent = '⏸';
+    playerWin.classList.add('playing');
+  }
+  function pause() {
+    audio.pause();
+    isPlaying = false;
+    btnPlay.textContent = '▶';
+    playerWin.classList.remove('playing');
+  }
+
+  btnPlay.addEventListener('click', () => isPlaying ? pause() : play());
+  btnStop.addEventListener('click', () => { pause(); audio.currentTime = 0; progress.value = 0; currentEl.textContent = '0:00'; });
+  btnPrev.addEventListener('click', () => {
+    trackIndex = (trackIndex - 1 + tracks.length) % tracks.length;
+    loadTrack(trackIndex);
+    if (isPlaying) play();
+  });
+  btnNext.addEventListener('click', () => {
+    trackIndex = (trackIndex + 1) % tracks.length;
+    loadTrack(trackIndex);
+    if (isPlaying) play();
+  });
+
+  audio.addEventListener('ended', () => {
+    trackIndex = (trackIndex + 1) % tracks.length;
+    loadTrack(trackIndex);
+    play();
+  });
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    progress.value = (audio.currentTime / audio.duration) * 100;
+    currentEl.textContent  = fmtTime(audio.currentTime);
+    durationEl.textContent = fmtTime(audio.duration);
+  });
+  progress.addEventListener('input', () => {
+    if (audio.duration) audio.currentTime = (progress.value / 100) * audio.duration;
+  });
+  volume.addEventListener('input', () => { audio.volume = volume.value / 100; });
+  audio.volume = 0.8;
+
+  loadTrack(0);
+  audio.volume = 0.8;
+
+  /* Позиция плеера — правый нижний угол над таскбаром */
+  function positionPlayer() {
+    playerWin.style.right  = '12px';
+    playerWin.style.bottom = '48px';
+    playerWin.style.left   = 'auto';
+    playerWin.style.top    = 'auto';
+  }
+  window.addEventListener('load', positionPlayer);
+
+  /* Перетаскивание плеера */
+  let pdrag = false, pox = 0, poy = 0;
+  playerBar.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    // Конвертируем right/bottom → left/top до начала тащить, чтоб не прыгало
+    const rect = playerWin.getBoundingClientRect();
+    playerWin.style.left   = rect.left + 'px';
+    playerWin.style.top    = rect.top  + 'px';
+    playerWin.style.right  = 'auto';
+    playerWin.style.bottom = 'auto';
+    pdrag = true;
+    pox = e.clientX - rect.left;
+    poy = e.clientY - rect.top;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!pdrag) return;
+    playerWin.style.left = Math.max(0, Math.min(e.clientX - pox, window.innerWidth  - playerWin.offsetWidth))  + 'px';
+    playerWin.style.top  = Math.max(0, Math.min(e.clientY - poy, window.innerHeight - 48 - playerWin.offsetHeight)) + 'px';
+  });
+  document.addEventListener('mouseup', () => { pdrag = false; });
+
+  /* Свернуть/развернуть плеер */
+  document.getElementById('playerMinimize').addEventListener('click', () => {
+    playerWin.classList.add('minimized');
+    taskBtnPl.classList.add('minimized-state');
+  });
+  function togglePlayer() {
+    if (playerWin.style.display === 'none') { playerWin.style.display = ''; return; }
+    if (playerWin.classList.contains('minimized')) {
+      playerWin.classList.remove('minimized');
+      taskBtnPl.classList.remove('minimized-state');
+    } else {
+      playerWin.classList.add('minimized');
+      taskBtnPl.classList.add('minimized-state');
+    }
+  }
+  /* ── /MEDIA PLAYER ── */
+</script>
+</body>
+</html>

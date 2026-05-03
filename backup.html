@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KlevVid</title>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --glass-bg:       rgba(20, 18, 40, 0.55);
+      --glass-border:   rgba(255, 255, 255, 0.12);
+      --glass-shadow:   rgba(0, 0, 0, 0.60);
+      --accent-blue:    #7ecfff;
+      --accent-purple:  #c084fc;
+      --text-primary:   rgba(240, 235, 255, 0.96);
+      --text-secondary: rgba(180, 170, 210, 0.78);
+      --text-dim:       rgba(140, 130, 170, 0.55);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; font-family:'Exo 2','Segoe UI',sans-serif; overflow:hidden; }
+
+    /* ── BG ── */
+    .bg {
+      position:fixed; inset:0; z-index:0;
+      background: url('bg.jpg') center/cover no-repeat;
+      filter: blur(22px) brightness(0.52) saturate(1.35);
+      transform: scale(1.07);
+    }
+    .bg-overlay {
+      position:fixed; inset:0; z-index:1;
+      background: linear-gradient(160deg,
+        rgba(8,4,22,0.45) 0%,
+        rgba(30,10,60,0.35) 50%,
+        rgba(5,15,40,0.50) 100%
+      );
+    }
+
+    /* ── SHELL ── */
+    .shell {
+      position:relative; z-index:10;
+      height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      padding:0 20px;
+    }
+
+    /* ── WINDOW ── */
+    .window {
+      width: min(880px, 100%);
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid var(--glass-border);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.05) inset,
+        0 28px 65px var(--glass-shadow),
+        0 0 90px rgba(120,80,200,0.18);
+      animation: windowIn .7s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes windowIn {
+      from { opacity:0; transform:translateY(24px) scale(0.97); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    /* ── TITLEBAR ── */
+    .titlebar {
+      height:38px;
+      background: linear-gradient(180deg, rgba(55,38,95,.82) 0%, rgba(28,18,62,.90) 100%);
+      border-bottom:1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(20px) saturate(1.6);
+      display:flex; align-items:center;
+      padding:0 14px; gap:10px;
+      position:relative;
+    }
+    .titlebar::after {
+      content:'';
+      position:absolute; top:0; left:0; right:0; height:50%;
+      background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,transparent 100%);
+      pointer-events:none; border-radius:16px 16px 0 0;
+    }
+    .tb-icon { font-size:15px; opacity:.8; }
+    .tb-title {
+      flex:1; text-align:center;
+      font-size:11.5px; font-family:'JetBrains Mono',monospace;
+      color:var(--text-dim); letter-spacing:.5px;
+    }
+    .tb-clock {
+      font-size:11px; font-family:'JetBrains Mono',monospace;
+      color:var(--text-dim); letter-spacing:.5px; margin-right:8px;
+    }
+    .tb-btns { display:flex; gap:7px; }
+    .tb-btn {
+      width:13px; height:13px; border-radius:50%;
+      border:none; cursor:pointer; transition:filter .15s;
+    }
+    .tb-btn:hover { filter:brightness(1.35); }
+    .tb-btn.min { background:radial-gradient(circle at 35% 35%,#fbbf24,#d97706); }
+    .tb-btn.max { background:radial-gradient(circle at 35% 35%,#34d399,#059669); }
+    .tb-btn.cls { background:radial-gradient(circle at 35% 35%,#f87171,#dc2626); }
+
+    /* ── WIN BODY ── */
+    .win-body {
+      background:var(--glass-bg);
+      backdrop-filter:blur(30px) saturate(1.9) brightness(1.06);
+      position:relative;
+      overflow:hidden;
+    }
+    .win-body::before {
+      content:'';
+      position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,255,255,.10) 30%,
+        rgba(255,255,255,.17) 50%,
+        rgba(255,255,255,.10) 70%,
+        transparent 100%
+      );
+    }
+
+    /* ── ПАНЕЛИ ── */
+    .panel {
+      padding:40px 44px 36px;
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .panel-main {
+      position:relative;
+    }
+    .panel-more {
+      position:absolute; top:0; left:0; right:0;
+      pointer-events:none; opacity:0; transform:translateX(40px);
+      /* фиксированная высота = как у main, со скроллом */
+      max-height:var(--panel-h, 500px);
+      overflow-y:scroll;
+      overflow-x:hidden;
+      /* кастомный скроллбар */
+      scrollbar-width:thin;
+      scrollbar-color: rgba(150,120,255,.5) rgba(255,255,255,.05);
+    }
+    /* webkit скроллбар */
+    .panel-more::-webkit-scrollbar { width:6px; }
+    .panel-more::-webkit-scrollbar-track { background:rgba(255,255,255,.04); border-radius:3px; }
+    .panel-more::-webkit-scrollbar-thumb {
+      background:linear-gradient(180deg,rgba(150,120,255,.6),rgba(100,180,255,.5));
+      border-radius:3px;
+    }
+    .panel-more::-webkit-scrollbar-thumb:hover { background:rgba(170,140,255,.8); }
+
+    /* состояния */
+    .panel-main.hide  { opacity:0; transform:translateX(-40px); pointer-events:none; }
+    .panel-more.show  { opacity:1; transform:translateX(0); pointer-events:all; }
+
+    /* ── LAYOUT ВНУТРИ MAIN ── */
+    .main-row { display:flex; gap:38px; align-items:center; }
+    .content  { flex:1; min-width:0; }
+
+    /* ── ТИПОГРАФИКА ── */
+    .greeting {
+      font-size:10.5px; font-family:'JetBrains Mono',monospace;
+      color:var(--accent-purple); letter-spacing:2.2px; text-transform:uppercase;
+      margin-bottom:10px;
+      opacity:0; animation:fadeUp .5s .25s ease both;
+    }
+    .name {
+      font-size:42px; font-weight:700; color:var(--text-primary);
+      line-height:1.08; margin-bottom:7px;
+      text-shadow:0 0 35px rgba(160,100,255,.25);
+      opacity:0; animation:fadeUp .5s .35s ease both;
+    }
+    .name span {
+      background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .tagline {
+      font-size:12.5px; color:var(--text-dim); letter-spacing:.4px; margin-bottom:26px;
+      opacity:0; animation:fadeUp .5s .42s ease both;
+    }
+    .divider {
+      height:1px; margin-bottom:22px;
+      background:linear-gradient(90deg,rgba(130,90,210,.4),rgba(100,180,255,.2) 55%,transparent);
+      opacity:0; animation:fadeUp .5s .48s ease both;
+    }
+    .about {
+      font-size:13.5px; line-height:1.78; color:var(--text-secondary); margin-bottom:26px;
+      opacity:0; animation:fadeUp .5s .55s ease both;
+    }
+    .about strong { color:var(--text-primary); font-weight:600; }
+
+    /* теги */
+    .tags {
+      display:flex; flex-wrap:wrap; gap:7px; margin-bottom:28px;
+      opacity:0; animation:fadeUp .5s .63s ease both;
+    }
+    .tag {
+      font-size:10.5px; font-family:'JetBrains Mono',monospace;
+      padding:3px 11px; border-radius:20px;
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.04);
+      color:var(--text-dim); letter-spacing:.2px;
+      transition:all .18s; cursor:default;
+    }
+    .tag:hover {
+      border-color:rgba(150,120,255,.32);
+      color:var(--text-secondary); background:rgba(130,90,210,.10);
+    }
+
+    /* контакты + кнопка */
+    .bottom-row {
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      flex-wrap:wrap;
+      opacity:0; animation:fadeUp .5s .72s ease both;
+    }
+    .contacts { display:flex; gap:22px; align-items:center; }
+    .contact  { display:flex; flex-direction:column; gap:3px; }
+    .contact-label {
+      font-size:9px; font-family:'JetBrains Mono',monospace;
+      letter-spacing:1.8px; text-transform:uppercase; color:var(--text-dim);
+    }
+    .contact-value {
+      font-size:13.5px; font-weight:600; color:var(--text-primary);
+      text-shadow:0 0 14px rgba(126,207,255,.35);
+      transition:text-shadow .2s; cursor:default;
+    }
+    .contact-value:hover { text-shadow:0 0 22px rgba(126,207,255,.75); }
+    .contact-sep {
+      width:1px; align-self:stretch;
+      background:linear-gradient(180deg,transparent,rgba(150,120,255,.22),transparent);
+    }
+
+    /* ── КНОПКА ПОДРОБНЕЕ ── */
+    .btn-more {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:9px 20px; border-radius:30px; cursor:pointer;
+      border:1px solid rgba(180,140,255,.30);
+      background:linear-gradient(135deg,rgba(120,80,200,.18),rgba(60,120,200,.12));
+      color:var(--text-secondary);
+      font-size:12px; font-family:'Exo 2',sans-serif; font-weight:600;
+      letter-spacing:.5px;
+      transition:all .2s;
+      backdrop-filter:blur(6px);
+    }
+    .btn-more:hover {
+      border-color:rgba(190,150,255,.55);
+      background:linear-gradient(135deg,rgba(130,90,210,.28),rgba(70,130,210,.20));
+      color:var(--text-primary);
+      box-shadow:0 0 18px rgba(150,100,255,.2);
+    }
+    .btn-more svg { transition:transform .2s; }
+    .btn-more:hover svg { transform:translateX(3px); }
+
+    /* ── АВАТАРКА ── */
+    .avatar-wrap {
+      flex-shrink:0;
+      opacity:0; animation:fadeUp .5s .40s ease both;
+    }
+    .avatar-placeholder {
+      width:142px; height:142px; border-radius:50%;
+      border:1.5px solid rgba(255,255,255,.11);
+      box-shadow:
+        0 0 0 1px rgba(130,90,210,.28),
+        0 10px 35px rgba(0,0,0,.5),
+        0 0 45px rgba(120,80,200,.18);
+      background:linear-gradient(135deg,rgba(75,48,135,.55),rgba(38,75,155,.55));
+      display:flex; align-items:center; justify-content:center;
+      font-size:48px; position:relative; overflow:hidden;
+    }
+    .avatar-placeholder::after {
+      content:'';
+      position:absolute; top:0; left:0; right:0; height:50%;
+      background:linear-gradient(180deg,rgba(255,255,255,.10) 0%,transparent 100%);
+      border-radius:50% 50% 0 0;
+    }
+
+    /* ── ПАНЕЛЬ ПОДРОБНЕЕ ── */
+    .more-header {
+      display:flex; align-items:center; gap:14px; margin-bottom:28px;
+    }
+    .btn-back {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:7px 16px; border-radius:30px; cursor:pointer;
+      border:1px solid rgba(180,140,255,.25);
+      background:rgba(255,255,255,.04);
+      color:var(--text-dim); font-size:11.5px;
+      font-family:'Exo 2',sans-serif; font-weight:600; letter-spacing:.4px;
+      transition:all .2s;
+    }
+    .btn-back:hover {
+      border-color:rgba(180,140,255,.45);
+      color:var(--text-secondary);
+      background:rgba(130,90,210,.10);
+    }
+    .more-title {
+      font-size:22px; font-weight:700; color:var(--text-primary);
+      text-shadow:0 0 25px rgba(160,100,255,.2);
+    }
+    .more-title span {
+      background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+
+    .more-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:14px;
+    }
+
+    .more-card {
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px; padding:18px 20px;
+      transition:border-color .2s, background .2s;
+    }
+    .more-card:hover {
+      border-color:rgba(150,120,255,.25);
+      background:rgba(130,90,210,.07);
+    }
+    .more-card-label {
+      font-size:9.5px; font-family:'JetBrains Mono',monospace;
+      letter-spacing:1.8px; text-transform:uppercase;
+      color:var(--accent-purple); margin-bottom:10px;
+    }
+    .more-card-text {
+      font-size:13px; line-height:1.72; color:var(--text-secondary);
+    }
+    .more-card-text strong { color:var(--text-primary); font-weight:600; }
+
+    /* карточка на всю ширину */
+    .more-card.full { grid-column:1/-1; }
+
+    /* ── WATERMARK ── */
+    .watermark {
+      position:fixed; bottom:16px; right:20px;
+      font-size:10.5px; font-family:'JetBrains Mono',monospace;
+      color:rgba(140,120,180,.28); letter-spacing:.8px;
+      z-index:20; user-select:none;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width:600px) {
+      .panel { padding:26px 20px 22px; }
+      .main-row { flex-direction:column-reverse; align-items:center; gap:22px; }
+      .name { font-size:30px; }
+      .avatar-placeholder { width:96px; height:96px; font-size:34px; }
+      .more-grid { grid-template-columns:1fr; }
+      .bg { filter:blur(14px) brightness(.50) saturate(1.3); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="bg-overlay"></div>
+
+<div class="shell">
+  <div class="window" id="window">
+
+    <div class="titlebar">
+      <span class="tb-icon">🌐</span>
+      <span class="tb-title">klevvid.ru</span>
+      <span class="tb-clock" id="clock">00:00</span>
+      <div class="tb-btns">
+        <button class="tb-btn min"></button>
+        <button class="tb-btn max"></button>
+        <button class="tb-btn cls"></button>
+      </div>
+    </div>
+
+    <div class="win-body" id="winBody">
+
+      <!-- ── ГЛАВНАЯ ПАНЕЛЬ ── -->
+      <div class="panel panel-main" id="panelMain">
+        <div class="main-row">
+          <div class="content">
+            <p class="greeting">// Hello</p>
+            <h1 class="name">Klev<span>Vid</span></h1>
+            <p class="tagline">геймер &nbsp;·&nbsp; разработчик &nbsp;·&nbsp; просто человек</p>
+            <div class="divider"></div>
+            <p class="about">
+              Привет, я <strong>Дмитрий</strong> — занимаюсь разработкой,
+              интересуюсь компьютерами и всем что с ними связано. Делаю штуки которые мне интересны. Иногда они работают. А так же люблю поиграть во всякие игры.<br>
+              Открыт к общению, новым знакомствам и интересным предложениям. Так же имею немного специфические взгляды на некоторые темы.
+            </p>
+            <div class="tags">
+              <span class="tag">Python</span>
+              <span class="tag">Linux</span>
+              <span class="tag">LLM</span>
+            </div>
+            <div class="bottom-row">
+              <div class="contacts">
+                <div class="contact">
+                  <span class="contact-label">Discord</span>
+                  <span class="contact-value">klevvid</span>
+                </div>
+                <div class="contact-sep"></div>
+                <div class="contact">
+                  <span class="contact-label">Telegram</span>
+                  <span class="contact-value">@KlevVid</span>
+                </div>
+              </div>
+              <button class="btn-more" id="btnMore">
+                Подробнее
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="avatar-wrap">
+            <img src="avatar.png" style="width:142px;height:142px;border-radius:50%;object-fit:cover;display:block;box-shadow:0 0 0 1px rgba(130,90,210,.28),0 10px 35px rgba(0,0,0,.5)">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ПАНЕЛЬ ПОДРОБНЕЕ ── -->
+      <div class="panel panel-more" id="panelMore">
+        <div class="more-header">
+          <button class="btn-back" id="btnBack">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Назад
+          </button>
+          <h2 class="more-title">Подробнее обо <span>мне</span></h2>
+        </div>
+
+        <div class="more-grid">
+          <div class="more-card">
+            <p class="more-card-label">// кто я</p>
+            <p class="more-card-text">
+              Мне <strong>16 лет</strong>, учусь на КСК —
+              компьютерные системы и комплексы. Люблю некоторые старые технологии, технику и игры.
+              В некотором роде меня привлекает фурри сообщество (вот тут прошу без негатива).
+              Прям конкретно свои цели и надежды сказать не могу, так как сам не определился. Можно сказать что я просто плыву по течению и не парюсь.
+              Стараюсь быть открытым, позитивным и искренним.
+            </p>
+          </div>
+          <div class="more-card">
+            <p class="more-card-label">// ещё немного инфы</p>
+            <p class="more-card-text">
+              Я создал это сайт по двум причинам:
+              1. Свой сайт - более громкий способ заявить миру о себе чем соцсети.
+              2. Просто хочу побольше общения в жизни.        
+
+              Ценю живое общение. Пиши по делу, для души или просто чтобы обсудить очередной абсурд. Главное — прямо, честно и без фальшивых масок.
+            </p>
+          </div>
+          <div class="more-card">
+            <p class="more-card-label">// сильные стороны</p>
+            <p class="more-card-text">
+              Быстро разбираюсь в новых технологиях, хорошо работаю в команде.
+              Несмотря на некоторые недостатки достаточно общительный и позитивный человек.
+            </p>
+          </div>
+          <div class="more-card">
+            <p class="more-card-label">// слабые стороны</p>
+            <p class="more-card-text">
+              Интроверт — на контакт иду не первым,
+              но открыт если ты напишешь. 
+            </p>
+          </div>
+          <div class="more-card full">
+            <p class="more-card-label">// открыт к</p>
+            <p class="more-card-text">
+              Новым знакомствам, интересным проектам и коллаборациям. Так же не против поиграть во что-то кооперативное.
+              Если есть идея или предложение — пиши в <strong>Telegram</strong> или <strong>Discord</strong>, отвечу.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- win-body -->
+  </div><!-- window -->
+</div><!-- shell -->
+
+<div class="watermark">KlevVid 2026</div>
+
+<script>
+  /* часы */
+  function tick(){
+    const n=new Date();
+    document.getElementById('clock').textContent=
+      String(n.getHours()).padStart(2,'0')+':'+
+      String(n.getMinutes()).padStart(2,'0');
+  }
+  tick(); setInterval(tick,15000);
+
+  /* переключение панелей */
+  const winBody   = document.getElementById('winBody');
+  const panelMain = document.getElementById('panelMain');
+  const panelMore = document.getElementById('panelMore');
+  const btnMore   = document.getElementById('btnMore');
+  const btnBack   = document.getElementById('btnBack');
+
+  // запоминаем высоту main-панели и фиксируем win-body
+  window.addEventListener('load', ()=>{
+    const h = panelMain.offsetHeight;
+    winBody.style.height = h + 'px';
+    // передаём в CSS чтоб panel-more знала свою max-height
+    panelMore.style.maxHeight = h + 'px';
+    panelMore.style.height    = h + 'px';
+  });
+
+  btnMore.addEventListener('click', ()=>{
+    panelMore.scrollTop = 0;
+    panelMain.classList.add('hide');
+    setTimeout(()=>{ panelMore.classList.add('show'); }, 180);
+  });
+
+  btnBack.addEventListener('click', ()=>{
+    panelMore.classList.remove('show');
+    setTimeout(()=>{ panelMain.classList.remove('hide'); }, 180);
+  });
+</script>
+</body>
+</html>
