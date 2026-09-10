@@ -9,14 +9,12 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; }
 
-    /* ── РАБ. СТОЛ ── */
     body {
       background: url('bg.jpg') center/cover no-repeat fixed;
       font-family: 'Segoe UI', Tahoma, sans-serif;
       user-select: none;
     }
 
-    /* ── ИКОНКИ РАБОЧЕГО СТОЛА ── */
     .desktop-icons {
       position: fixed;
       top: 14px; left: 10px;
@@ -53,7 +51,6 @@
       line-height: 1.2;
     }
 
-    /* ── ОКНО — тёмный фон, glass-класс рисует рамку и заголовок ── */
     .main-window {
       position: fixed;
       width: min(700px, calc(100vw - 24px));
@@ -68,12 +65,10 @@
       to   { opacity: 1; transform: scale(1); }
     }
 
-    /* title-bar — используем нативный glass от 7.css, только курсор */
     .main-window .title-bar {
       cursor: move;
     }
 
-    /* Тёмный window-body */
     .main-window .window-body {
       background: rgba(15, 19, 30, 0.88) !important;
       backdrop-filter: blur(8px);
@@ -82,7 +77,6 @@
       z-index: 1;
     }
 
-    /* Тёмный менюбар */
     .main-window [role="menubar"] {
       position: relative;
       z-index: 9999 !important;
@@ -91,7 +85,7 @@
       -webkit-backdrop-filter: blur(8px);
       border-bottom: 1px solid rgba(60, 90, 160, 0.35) !important;
     }
-    /* Пункты меню — текст светлый */
+    
     .main-window [role="menubar"] > li,
     .main-window [role="menubar"] > li > a {
       color: rgba(200, 220, 255, 0.9) !important;
@@ -116,7 +110,6 @@
       background: rgba(60, 100, 200, 0.4) !important;
     }
 
-    /* Тёмный статусбар */
     .main-window .status-bar {
       background: rgba(12, 16, 30, 0.85) !important;
       backdrop-filter: blur(8px);
@@ -128,14 +121,12 @@
       color: rgba(160, 190, 240, 0.85) !important;
     }
 
-    /* Свёрнутое состояние */
     .main-window.minimized .window-body,
     .main-window.minimized [role="menubar"],
     .main-window.minimized .status-bar {
       display: none !important;
     }
 
-    /* ── ПРОФИЛЬ ── */
     .profile-row {
       display: flex;
       align-items: center;
@@ -171,7 +162,6 @@
     .about-text { font-size: 13px; line-height: 1.72; color: rgba(190, 210, 245, 0.9); user-select: text; }
     .about-text strong { color: rgba(130, 180, 255, 0.95); }
 
-    /* Контакты */
     .contacts-row {
       display: flex; align-items: center;
       justify-content: space-between; flex-wrap: wrap;
@@ -182,7 +172,6 @@
     .c-item .lbl { font-size: 10px; text-transform: uppercase; color: rgba(100, 140, 200, 0.8); letter-spacing: 1px; }
     .c-item .val { font-size: 13px; font-weight: bold; color: rgba(130, 180, 255, 0.95); }
 
-    /* fieldset тёмный */
     .main-window fieldset {
       border-color: rgba(60, 90, 160, 0.5) !important;
     }
@@ -191,8 +180,7 @@
       background: rgba(15, 19, 30, 0.88) !important;
       padding: 0 4px !important;
     }
-
-    /* ── ПАНЕЛИ ── */
+    
     .panel-more { display: none; flex-direction: column; }
     .panel-more.show { display: flex; }
     .panel-main.hide { display: none; }
@@ -224,7 +212,6 @@
     }
     .more-grid fieldset.full { grid-column: 1 / -1; }
 
-    /* ── TASKBAR — тёмный стеклянный Aero ── */
     .taskbar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -245,7 +232,6 @@
       overflow: visible;
     }
 
-    /* ── СТРОКИ ПРОВОДНИКА КОРЗИНЫ ── */
     .trash-row {
       display: grid;
       grid-template-columns: 1fr 90px 90px 100px;
@@ -259,26 +245,20 @@
     .trash-row:hover { background: rgba(60,100,200,0.25); }
     .trash-row:active { background: rgba(60,100,200,0.45); }
 
-    /* ── AERO ДИАЛОГИ (ошибка пуска + о программе) ── */
     .aero-dialog {
       box-shadow:
         0 0 0 1px rgba(255,255,255,0.18),
         0 0 28px rgba(60,120,255,0.22),
         0 14px 40px rgba(0,0,0,0.75) !important;
-      /* Лёгкое синеватое свечение рамки как у Aero */
       outline: 1px solid rgba(80,140,255,0.25);
     }
 
-    /* Тайтлбар — такой же glass как у главного окна, уже есть от 7.css glass-класса */
-
-    /* Body диалога — тёмный полупрозрачный как main-window */
     .aero-dialog-body {
       background: rgba(15, 19, 30, 0.82) !important;
       backdrop-filter: blur(18px) saturate(1.6) !important;
       -webkit-backdrop-filter: blur(18px) saturate(1.6) !important;
     }
 
-    /* Fieldset внутри диалога */
     .aero-dialog-fieldset {
       border-color: rgba(60, 90, 160, 0.5) !important;
     }
@@ -288,7 +268,6 @@
       padding: 0 4px !important;
     }
 
-    /* Кнопки диалога — такой же стиль как у main-window */
     .aero-dialog-btn {
       background: linear-gradient(to bottom, rgba(40,60,110,0.9), rgba(20,35,75,0.95)) !important;
       border-color: rgba(70,110,200,0.6) !important;
@@ -307,9 +286,7 @@
       box-shadow: 0 0 0 1px rgba(80,130,220,0.4), inset 0 1px 0 rgba(120,160,255,0.2) !important;
     }
 
-    /* ── КНОПКА ПУСК — строго круглая ── */
     .start-btn {
-      /* Фиксированный одинаковый width и height — ключ к кругу */
       width: 46px;
       height: 46px;
       min-width: 46px;
@@ -319,11 +296,10 @@
       flex-shrink: 0;
       padding: 0;
       margin-left: 5px;
-      margin-bottom: 8px; /* выступает над таскбаром */
+      margin-bottom: 8px;
       cursor: default;
       position: relative;
       z-index: 1001;
-      /* Синий градиент как Win7 */
       background:
         radial-gradient(circle at 50% 28%, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0) 55%),
         radial-gradient(circle at 50% 100%, rgba(0,20,80,0.4) 0%, transparent 60%),
@@ -332,25 +308,21 @@
       box-shadow:
         0 0 0 1px rgba(255,255,255,0.20),
         0 4px 14px rgba(0,0,0,0.55);
-      /* Убираем все браузерные стили кнопки */
       outline: none;
       -webkit-appearance: none;
       appearance: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      /* Переход только box-shadow, без фона — чтобы не было глюков */
       transition: box-shadow 0.12s ease;
     }
 
-    /* Отключаем квадратные рамки от 7.css */
     .start-btn::before,
     .start-btn::after {
       display: none !important;
       content: none !important;
     }
 
-    /* Убиваем ВСЕ переопределения от 7.css и браузера */
     .start-btn:hover,
     .start-btn:focus,
     .start-btn:focus-visible,
@@ -398,7 +370,6 @@
       display: block;
     }
 
-    /* ── КНОПКА ОКНА В ТАСКБАРЕ ── */
     .taskbar-btn {
       height: 26px;
       padding: 0 10px;
@@ -433,7 +404,6 @@
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
     }
 
-    /* ── ТРЕЙ ── */
     .taskbar-tray {
       margin-left: auto;
       display: flex;
@@ -455,7 +425,6 @@
     .tray-time { font-size: 12px; font-weight: 600; line-height: 1; }
     .tray-date { font-size: 10px; line-height: 1; opacity: 0.85; }
 
-    /* ── ТЁМНЫЕ КНОПКИ (override 7.css) ── */
     .main-window button:not(.title-bar-controls button) {
       background: linear-gradient(to bottom, rgba(40,60,110,0.9), rgba(20,35,75,0.95)) !important;
       border-color: rgba(70,110,200,0.6) !important;
@@ -474,7 +443,6 @@
       box-shadow: 0 0 0 1px rgba(80,130,220,0.4), inset 0 1px 0 rgba(120,160,255,0.2) !important;
     }
 
-    /* ── MEDIA PLAYER (Windows Media Player style) ── */
     .player-window {
       position: fixed;
       width: 380px;
@@ -483,7 +451,6 @@
     }
     .player-window .title-bar { cursor: move; }
 
-    /* Всё тело — чёрное */
     .player-window .window-body {
       background: #000 !important;
       padding: 0 !important;
@@ -491,7 +458,6 @@
       flex-direction: column;
     }
 
-    /* Главная зона — тёмный фон с синим свечением как в WMP */
     .wmp-stage {
       flex: 1;
       min-height: 180px;
@@ -510,7 +476,6 @@
       padding: 24px 16px 20px;
     }
 
-    /* Анимация свечения когда играет — CSS only */
     .wmp-stage::before {
       content: '';
       position: absolute;
@@ -522,7 +487,6 @@
     }
     .player-window.playing .wmp-stage::before { opacity: 1; }
 
-    /* Пульс-кольцо — CSS анимация без JS */
     .wmp-stage::after {
       content: '';
       position: absolute;
@@ -542,7 +506,6 @@
       100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
     }
 
-    /* Обложка */
     .wmp-cover {
       width: 96px; height: 96px;
       border-radius: 4px;
@@ -587,7 +550,6 @@
       max-width: 320px;
     }
 
-    /* ── Панель управления снизу — тёмно-серая как в WMP ── */
     .wmp-controls-bar {
       background: linear-gradient(to bottom, #1a1a1a 0%, #0f0f0f 100%);
       border-top: 1px solid #2a2a2a;
@@ -597,7 +559,6 @@
       gap: 6px;
     }
 
-    /* Прогресс-бар */
     .wmp-progress-row {
       display: flex;
       align-items: center;
@@ -637,7 +598,6 @@
       cursor: pointer;
     }
 
-    /* Кнопки + громкость в одну строку */
     .wmp-bottom-row {
       display: flex;
       align-items: center;
@@ -665,7 +625,6 @@
     .wmp-btns button:hover { color: #fff !important; background: rgba(255,255,255,0.08) !important; }
     .wmp-btns button:active { background: rgba(255,255,255,0.15) !important; }
 
-    /* Кнопка play — синий круг */
     .wmp-btn-play {
       width: 36px !important; height: 36px !important;
       border-radius: 50% !important;
@@ -683,7 +642,6 @@
       box-shadow: 0 0 16px rgba(60,140,255,0.7), inset 0 1px 0 rgba(255,255,255,0.3) !important;
     }
 
-    /* Громкость — вертикальная через rotate */
     .wmp-vol-row {
       display: flex;
       align-items: center;
@@ -725,7 +683,6 @@
       cursor: pointer;
     }
     .player-window.minimized .window-body { display: none !important; }
-    /* ── /MEDIA PLAYER ── */
     @media (max-width: 600px) {
       .desktop-icons { display: none; }
       .main-window { width: calc(100vw - 12px) !important; }
@@ -741,7 +698,6 @@
       .start-btn { width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
       .start-btn img { width: 22px; height: 22px; }
 
-      /* Плеер на мобиле — полная ширина, снизу над таскбаром */
       .player-window {
         width: calc(100vw - 12px) !important;
         right: 6px !important;
@@ -749,7 +705,6 @@
         bottom: 48px !important;
         top: auto !important;
       }
-      /* На мобиле stage поменьше, без лишней высоты */
       .wmp-stage { min-height: 120px !important; padding: 14px 12px !important; }
       .wmp-cover { width: 72px !important; height: 72px !important; font-size: 30px !important; }
       .wmp-vol { width: 80px !important; }
@@ -902,7 +857,7 @@
     <p class="status-bar-field" id="statusClock">00:00</p>
   </div>
 
-</div><!-- ── MEDIA PLAYER WINDOW ── -->
+</div>
 <div class="window glass active player-window" id="playerWindow" style="--w7-w-bg: #111;">
   <div class="title-bar" id="playerTitleBar">
     <div class="title-bar-text">▶ Windows Media Player</div>
@@ -914,7 +869,6 @@
   </div>
   <div class="window-body">
 
-    <!-- Зона визуализации -->
     <div class="wmp-stage" id="wmpStage">
       <div class="wmp-cover" id="playerCover">
         <img src="" id="playerCoverImg" style="display:none" alt="">
@@ -926,7 +880,6 @@
       </div>
     </div>
 
-    <!-- Панель управления -->
     <div class="wmp-controls-bar">
       <div class="wmp-progress-row">
         <span class="wmp-time" id="playerCurrent">0:00</span>
@@ -952,7 +905,6 @@
   </div>
 </div>
 
-<!-- ══ ДОКУМЕНТЫ — ПРОВОДНИК ══ -->
 <div id="docsOverlay" style="display:none;position:fixed;inset:0;z-index:9996;background:transparent;">
   <div class="window glass active aero-dialog" id="docsDialog" style="position:absolute;width:560px;--w7-w-bg:#1a2d52;animation:windowIn 0.2s cubic-bezier(0.22,1,0.36,1) both;">
 
@@ -965,7 +917,6 @@
       </div>
     </div>
 
-    <!-- Меню проводника -->
     <div style="background:rgba(20,28,50,0.8);backdrop-filter:blur(8px);border-bottom:1px solid rgba(60,90,160,0.35);padding:2px 6px;display:flex;gap:2px;">
       <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Файл</span>
       <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Правка</span>
@@ -974,7 +925,6 @@
       <span style="padding:2px 8px;font-size:12px;color:rgba(200,220,255,0.9);cursor:default;">Справка</span>
     </div>
 
-    <!-- Адресная строка -->
     <div style="background:rgba(15,20,40,0.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(60,90,160,0.3);padding:4px 8px;display:flex;align-items:center;gap:6px;">
       <button class="aero-dialog-btn" style="font-size:11px;padding:1px 8px;">◀</button>
       <button class="aero-dialog-btn" style="font-size:11px;padding:1px 8px;">▶</button>
@@ -984,7 +934,6 @@
       <button class="aero-dialog-btn" style="font-size:11px;padding:1px 10px;">Поиск</button>
     </div>
 
-    <!-- Тулбар -->
     <div style="background:rgba(18,25,48,0.6);backdrop-filter:blur(6px);border-bottom:1px solid rgba(60,90,160,0.25);padding:4px 8px;display:flex;align-items:center;gap:6px;">
       <span style="font-size:11px;color:rgba(160,190,240,0.7);">Упорядочить ▾</span>
       <div style="width:1px;height:16px;background:rgba(100,140,220,0.3);margin:0 2px;"></div>
@@ -993,7 +942,6 @@
 
     <div class="window-body aero-dialog-body" style="padding:0;display:flex;min-height:220px;">
 
-      <!-- Левая панель -->
       <div style="width:140px;flex-shrink:0;border-right:1px solid rgba(60,90,160,0.3);padding:8px 6px;font-size:11px;color:rgba(140,170,220,0.8);">
         <div style="margin-bottom:6px;color:rgba(160,200,255,0.6);font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:1px;">Избранное</div>
         <div style="padding:3px 6px;cursor:default;">🖥️ Рабочий стол</div>
@@ -1004,15 +952,12 @@
         <div style="padding:3px 6px;cursor:default;">💾 Диск (D:)</div>
       </div>
 
-      <!-- Правая панель — содержимое -->
       <div style="flex:1;padding:6px 4px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(60,100,180,0.7) rgba(15,20,40,0.6);">
 
-        <!-- Заголовки колонок -->
         <div style="display:grid;grid-template-columns:1fr 90px 90px 110px;padding:2px 8px;font-size:11px;color:rgba(120,160,220,0.7);border-bottom:1px solid rgba(60,90,160,0.25);margin-bottom:2px;">
           <span>Имя</span><span>Тип</span><span>Размер</span><span>Дата изменения</span>
         </div>
 
-        <!-- Папки -->
         <div class="trash-row" ondblclick="openFileError('волгоград','НЕТ ДОСТУПА\n\nAccess is denied.\n\nВолгоград 2023\n\nОтказано в доступе к папке.')">
           <span>📁 Волгоград 2023</span><span>Папка</span><span>—</span><span>13.04.2023</span>
         </div>
@@ -1023,7 +968,6 @@
           <span>📁 Домашка</span><span>Папка</span><span>1 488 ТБ</span><span>01.09.2025</span>
         </div>
 
-        <!-- Файлы -->
         <div class="trash-row" ondblclick="openFileError('база','НЕТ ДОСТУПА\n\nAccess is denied.\n\nПроект «БАЗА».py\n\nОтказано в доступе к файлу.')">
           <span>🐍 Проект «БАЗА».py</span><span>.py</span><span id="sizeBase">...</span><span>вчера</span>
         </div>
@@ -1037,7 +981,6 @@
       </div>
     </div>
 
-    <!-- Статусбар -->
     <div style="background:rgba(12,16,30,0.85);backdrop-filter:blur(8px);border-top:1px solid rgba(60,90,160,0.35);padding:3px 10px;font-size:11px;color:rgba(140,170,220,0.75);display:flex;justify-content:space-between;">
       <span>Объектов: 6</span>
       <span>Общий размер: очень много</span>
@@ -1046,7 +989,6 @@
   </div>
 </div>
 
-<!-- ══ КОРЗИНА — ПУСТАЯ ══ -->
 <div id="trashOverlay" style="display:none;position:fixed;inset:0;z-index:9996;background:transparent;">
   <div class="window glass active aero-dialog" id="trashDialog" style="position:absolute;width:420px;--w7-w-bg:#1a2d52;animation:windowIn 0.2s cubic-bezier(0.22,1,0.36,1) both;">
     <div class="title-bar" id="trashTitleBar" style="cursor:move;">
@@ -1073,7 +1015,6 @@
   </div>
 </div>
 
-<!-- Диалог пустой папки -->
 <div id="subFolderOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:transparent;">
   <div class="window glass active aero-dialog" id="subFolderDialog" style="position:absolute;width:380px;--w7-w-bg:#1a2d52;animation:windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
     <div class="title-bar" id="subFolderTitleBar" style="cursor:move;">
@@ -1097,7 +1038,6 @@
   </div>
 </div>
 
-<!-- Диалог "Домашка" — бесконечная загрузка -->
 <div id="domashkaOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:transparent;">
   <div class="window glass active aero-dialog" id="domashkaDialog" style="position:absolute;width:400px;--w7-w-bg:#1a2d52;animation:windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
     <div class="title-bar" id="domashkaTitleBar" style="cursor:move;">
@@ -1122,7 +1062,6 @@
   </div>
 </div>
 
-<!-- Диалог ошибки файла -->
 <div id="fileErrorOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:transparent;">
   <div class="window glass active aero-dialog" id="fileErrorDialog" style="position:absolute;width:360px;--w7-w-bg:#1a2d52;animation:windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
     <div class="title-bar" style="cursor:default;">
@@ -1147,7 +1086,6 @@
   </div>
 </div>
 
-<!-- ОКНО МОЙ КОМПЬЮТЕР -->
 <div id="mypcOverlay" style="display:none; position:fixed; inset:0; z-index:9997; background:transparent;" onclick="if(event.target===this)closeMyPC()">
   <div class="window glass active aero-dialog" id="mypcDialog" style="position:absolute; width:300px; --w7-w-bg: #1a2d52; animation: windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both;">
     <div class="title-bar" id="mypcTitleBar" style="cursor:move;">
@@ -1157,7 +1095,6 @@
       </div>
     </div>
     <div class="window-body aero-dialog-body" style="padding:0;">
-      <!-- Имитация меню блокнота -->
       <div style="
         background: rgba(20,28,50,0.75);
         backdrop-filter: blur(8px);
@@ -1171,7 +1108,6 @@
         <span style="padding:2px 6px; cursor:default;">Правка</span>
         <span style="padding:2px 6px; cursor:default;">Вид</span>
       </div>
-      <!-- Текстовая область -->
       <pre style="
         margin:0;
         padding:14px 16px;
@@ -1190,7 +1126,6 @@ AMD Radeon RX580 2048SP (8GB)
 1.5 TB места суммарно
 
 I use arch btw</pre>
-      <!-- Статусбар -->
       <div style="
         background: rgba(12,16,30,0.85);
         backdrop-filter: blur(8px);
@@ -1203,7 +1138,6 @@ I use arch btw</pre>
   </div>
 </div>
 
-<!-- МОДАЛКА О ПРОГРАММЕ -->
 <div id="aboutOverlay" style="display:none; position:fixed; inset:0; z-index:9998; background:rgba(0,0,0,0.18);" onclick="if(event.target===this)closeAbout()">
   <div class="window glass active aero-dialog" id="aboutDialog" style="position:absolute; width:340px; animation: windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both; --w7-w-bg: #1a2d52;">
     <div class="title-bar" style="cursor:default;">
@@ -1235,7 +1169,6 @@ I use arch btw</pre>
   </div>
 </div>
 
-<!-- МОДАЛКА ОШИБКИ ПУСКА -->
 <div id="startErrorOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:transparent;" onclick="closeStartError(event)">
   <div class="window glass active aero-dialog" id="startErrorDialog" style="position:absolute; width:380px; animation: windowIn 0.18s cubic-bezier(0.22,1,0.36,1) both; --w7-w-bg: #1a2d52;">
     <div class="title-bar" style="cursor:default;">
@@ -1266,7 +1199,6 @@ I use arch btw</pre>
   </div>
 </div>
 
-<!-- ТОСТ ДЛЯ МОБИЛОК В ПОРТРЕТНОЙ ОРИЕНТАЦИИ -->
 <div id="mobileToast" style="
   display:none;
   position:fixed;
@@ -1340,7 +1272,6 @@ I use arch btw</pre>
 </div>
 
 <script>
-  /* ── ДОКУМЕНТЫ ── */
   function randSize() {
     const units = ['КБ','МБ','ГБ'];
     const u = units[Math.floor(Math.random()*units.length)];
@@ -1366,10 +1297,8 @@ I use arch btw</pre>
   function closeDocs() { document.getElementById('docsOverlay').style.display = 'none'; }
   function docsMin()   { closeDocs(); }
 
-  /* ── КОРЗИНА ── */
   function closeTrash() { document.getElementById('trashOverlay').style.display = 'none'; }
 
-  // Перетаскивание проводника Документы
   (function(){
     const bar = document.getElementById('docsTitleBar');
     const dlg = document.getElementById('docsDialog');
@@ -1386,7 +1315,6 @@ I use arch btw</pre>
     document.addEventListener('mouseup',()=>{drag=false;});
   })();
 
-  // Пустые папки
   const subNames = { volgograd:'📁 Волгоград 2023', rostov:'📁 Ростов' };
   function openSubFolder(id) {
     document.getElementById('subFolderTitle').textContent = subNames[id] || '📁 Папка';
@@ -1399,7 +1327,6 @@ I use arch btw</pre>
   }
   function closeSubFolder(){ document.getElementById('subFolderOverlay').style.display='none'; }
 
-  // Перетаскивание пустой папки
   (function(){
     const bar=document.getElementById('subFolderTitleBar');
     const dlg=document.getElementById('subFolderDialog');
@@ -1409,7 +1336,6 @@ I use arch btw</pre>
     document.addEventListener('mouseup',()=>{drag=false;});
   })();
 
-  // Домашка — бесконечный прогрессбар
   let domashkaTimer = null;
   let domashkaProgress = 0;
   const domashkaStatuses = [
@@ -1441,7 +1367,6 @@ I use arch btw</pre>
   }
   function closeDomashka(){ clearInterval(domashkaTimer); document.getElementById('domashkaOverlay').style.display='none'; }
 
-  // Перетаскивание домашки
   (function(){
     const bar=document.getElementById('domashkaTitleBar');
     const dlg=document.getElementById('domashkaDialog');
@@ -1451,7 +1376,6 @@ I use arch btw</pre>
     document.addEventListener('mouseup',()=>{drag=false;});
   })();
 
-  // Ошибка файла
   function openFileError(name, msg) {
     document.getElementById('fileErrorText').textContent = msg;
     const dlg = document.getElementById('fileErrorDialog');
@@ -1463,7 +1387,6 @@ I use arch btw</pre>
   }
   function closeFileError(){ document.getElementById('fileErrorOverlay').style.display='none'; }
 
-  /* ── МОБИЛЬНЫЙ ТОСТ ── */
   (function() {
     const toast = document.getElementById('mobileToast');
     let dismissed = false;
@@ -1489,7 +1412,6 @@ I use arch btw</pre>
     screen.orientation && screen.orientation.addEventListener('change', checkOrientation);
   })();
 
-  /* ── МОЙ КОМПЬЮТЕР ── */
   function openMyPC() {
     const overlay = document.getElementById('mypcOverlay');
     const dialog  = document.getElementById('mypcDialog');
@@ -1505,7 +1427,6 @@ I use arch btw</pre>
     document.getElementById('mypcOverlay').style.display = 'none';
   }
 
-  // Перетаскивание окна Мой компьютер
   (function() {
     const bar = document.getElementById('mypcTitleBar');
     const dlg = document.getElementById('mypcDialog');
@@ -1525,7 +1446,6 @@ I use arch btw</pre>
     document.addEventListener('mouseup', () => { drag = false; });
   })();
 
-  /* ── О ПРОГРАММЕ ── */
   function openAbout(e) {
     e && e.preventDefault();
     const overlay = document.getElementById('aboutOverlay');
@@ -1542,18 +1462,15 @@ I use arch btw</pre>
     document.getElementById('aboutOverlay').style.display = 'none';
   }
 
-  /* ── ОШИБКА ПУСКА ── */
   function openStartError(e) {
     const overlay = document.getElementById('startErrorOverlay');
     const dialog  = document.getElementById('startErrorDialog');
     overlay.style.display = 'block';
-    // Позиционируем диалог над кнопкой пуск
     const btn  = e.currentTarget;
     const rect = btn.getBoundingClientRect();
     const dw   = 380;
     let left   = rect.left;
-    let top    = rect.top - 10; // чуть выше, потом JS скорректирует
-    // После рендера — поднимаем выше высоты окна
+    let top    = rect.top - 10;
     requestAnimationFrame(() => {
       const dh = dialog.offsetHeight;
       left = Math.max(8, Math.min(left, window.innerWidth - dw - 8));
@@ -1566,12 +1483,10 @@ I use arch btw</pre>
   function closeStartError(e) {
     e.stopPropagation();
     const overlay = document.getElementById('startErrorOverlay');
-    // Закрываем только если клик по оверлею (не по самому окну), или по кнопкам
     if (e.currentTarget === overlay && e.target !== overlay) return;
     overlay.style.display = 'none';
   }
 
-  /* ── ЧАСЫ ── */
   function tick() {
     const n = new Date();
     const t = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
@@ -1582,13 +1497,11 @@ I use arch btw</pre>
   }
   tick(); setInterval(tick, 10000);
 
-  /* ── ЦЕНТРИРОВАНИЕ ОКНА ── */
   const win = document.getElementById('mainWindow');
 
   function centerWindow() {
     const ww = window.innerWidth;
     const isMobile = ww <= 600;
-    // На мобиле плеер занимает место снизу — учитываем его высоту
     const playerH = isMobile ? (document.getElementById('playerWindow').offsetHeight || 0) : 0;
     const wh = window.innerHeight - 38 - playerH;
     const ow = win.offsetWidth;
@@ -1597,13 +1510,11 @@ I use arch btw</pre>
     win.style.top  = Math.max(0, Math.round((wh - oh) / 2)) + 'px';
   }
 
-  // Центрируем после загрузки всего
   window.addEventListener('load', centerWindow);
   window.addEventListener('resize', () => {
     if (!win.classList.contains('minimized')) centerWindow();
   });
 
-  /* ── ПЕРЕТАСКИВАНИЕ ── */
   const titleBar = document.getElementById('titleBar');
   let dragging = false, ox = 0, oy = 0;
 
@@ -1625,7 +1536,6 @@ I use arch btw</pre>
   });
   document.addEventListener('mouseup', () => { dragging = false; });
 
-  // Touch
   titleBar.addEventListener('touchstart', e => {
     if (e.target.tagName === 'BUTTON') return;
     const t = e.touches[0];
@@ -1645,7 +1555,6 @@ I use arch btw</pre>
   }, { passive: true });
   document.addEventListener('touchend', () => { dragging = false; });
 
-  /* ── СВЕРНУТЬ / РАЗВЕРНУТЬ ── */
   const taskbarBtn = document.getElementById('taskbarBtn');
 
   function minimize() {
@@ -1662,7 +1571,6 @@ I use arch btw</pre>
 
   document.getElementById('btnMinimize').addEventListener('click', minimize);
 
-  /* ── ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ── */
   const panelMain = document.getElementById('panelMain');
   const panelMore = document.getElementById('panelMore');
 
@@ -1674,9 +1582,7 @@ I use arch btw</pre>
   document.getElementById('menuMain').addEventListener('click', e => { e.preventDefault(); showMain(); });
   document.getElementById('menuMore').addEventListener('click', e => { e.preventDefault(); showMore(); });
 
-  /* ── MEDIA PLAYER ── */
   const tracks = [
-    // Замени src на свои mp3, cover на обложку (необязательно)
     { title: 'pathetique.ogg', artist: 'Dirty Fox games', src: 'music/pathetique.ogg', cover: '' },
     { title: 'Атомная бензопила',                   artist: 'KlevVid', src: 'music/benzopila.mp3', cover: '' },
     { title: 'СССР',                     artist: 'KlevVid', src: 'music/USSR.mp3', cover: '' },
@@ -1772,7 +1678,6 @@ I use arch btw</pre>
   loadTrack(0);
   audio.volume = 0.8;
 
-  /* Позиция плеера — правый нижний угол над таскбаром */
   function positionPlayer() {
     playerWin.style.right  = '12px';
     playerWin.style.bottom = '48px';
@@ -1781,11 +1686,9 @@ I use arch btw</pre>
   }
   window.addEventListener('load', positionPlayer);
 
-  /* Перетаскивание плеера */
   let pdrag = false, pox = 0, poy = 0;
   playerBar.addEventListener('mousedown', e => {
     if (e.target.tagName === 'BUTTON') return;
-    // Конвертируем right/bottom → left/top до начала тащить, чтоб не прыгало
     const rect = playerWin.getBoundingClientRect();
     playerWin.style.left   = rect.left + 'px';
     playerWin.style.top    = rect.top  + 'px';
@@ -1803,7 +1706,6 @@ I use arch btw</pre>
   });
   document.addEventListener('mouseup', () => { pdrag = false; });
 
-  /* Свернуть/развернуть плеер */
   document.getElementById('playerMinimize').addEventListener('click', () => {
     playerWin.classList.add('minimized');
     taskBtnPl.classList.add('minimized-state');
@@ -1818,7 +1720,6 @@ I use arch btw</pre>
       taskBtnPl.classList.add('minimized-state');
     }
   }
-  /* ── /MEDIA PLAYER ── */
 </script>
 </body>
 </html>
